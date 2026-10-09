@@ -1,0 +1,41 @@
+﻿# IntelliJ IDEA local state
+.idea/
+*.iml
+out/
+
+# Gradle
+.gradle/
+build/
+
+# Local AI / IDE state
+.aim/
+
+# Codex machine-specific configuration
+.codex/config.toml
+
+# Local generated reports and reviews
+_local/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+local.properties
+
+# Logs
+*.log
+
+# Local model binaries
+models/**/*.gguf
+models/**/*.safetensors
+models/**/*.onnx
+models/**/*.pt
+models/**/*.pth
+
+# Managed/downloaded runtimes
+.runtime/
+runtimes/
+
+# Operating system files
+.DS_Store
+Thumbs.db
