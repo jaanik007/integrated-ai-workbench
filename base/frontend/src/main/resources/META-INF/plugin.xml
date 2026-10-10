@@ -1,7 +1,22 @@
+
 <idea-plugin>
     <id>integrated-ai-workbench</id>
     <name>Integrated AI Workbench</name>
     <vendor url="https://github.com/jaanik007/integrated-ai-workbench">Integrated AI Workbench</vendor>
+
+    <description><![CDATA[
+        Integrated AI Workbench is a local-first AI development
+        environment integrated into IntelliJ IDEA.
+
+        The project aims to support user-supplied local language
+        models, agent and skill workflows, controlled project
+        grounding, secure tool execution, structured output,
+        and model evaluation.
+
+        The Base Plugin is under active development.
+        Cloud services and external AI applications are not
+        required by its intended core architecture.
+    ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
 
