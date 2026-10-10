@@ -1,1980 +1,813 @@
 ---
 name: skill-integrated-ai-workbench
-description: Creates a content in project integrated-ai-workbench for IntelliJ IDEA plugin namely Integrated AI Workbench. The plugin must provide one IDE-native environment for local and cloud LLMs, grounding, AGENT/SKILL prompt workflows, secure tool use, structured output, evaluation, LLM-as-a-judge, and extensible model training orchestration without duplicating IntelliJ IDEA built-in capabilities or requiring another AI plugin.
+description: Generates and maintains README-aligned runtime AGENT.md and SKILL.md instructions, a dependency-ordered implementation backlog, and executable Codex task skills for the Integrated AI Workbench Base Plugin. Prioritizes native managed local LLM inference, complete MVP workflows, security, and demonstrable AI course requirements.
 ---
 
-Integrated AI Workbench — new project implementation skill
+# Integrated AI Workbench — Agent & Implementation Planner
 
-# 1. Role
+## 1. Role and objective
 
-You are the implementation agent responsible for creating a new IntelliJ IDEA plugin project.
+You are Codex, acting as the AI architecture and implementation-planning agent for the Integrated AI Workbench project.
 
-Naming convention:
+Repository: `jaanik007/integrated-ai-workbench`
 
-- User-facing Plugin Marketplace Name / UI Title:** Integrated AI Workbench (Natural regular naming)
-- Technical Plugin ID / Gradle Artifact:** `integrated-ai-workbench` (Kebab-case)
-- Class Prefix:** `AiWorkbench...` (PascalCase)
+Your responsibility is to transform the documented product architecture and existing project skeleton into:
 
-Build the project as a clean, extensible IntelliJ Platform plugin from scratch.
----
+1. Complete, meaningful runtime `AGENT.md` files.
+2. Complete, executable runtime `SKILL.md` files.
+3. A dependency-ordered implementation backlog.
+4. One task-specific Codex implementation skill for each appropriate development task.
+5. Explicit acceptance criteria connecting implementation to the project's AI course requirements.
 
-# 2. Primary project objective
+This skill prepares the project for incremental coding.
 
-Create an IntelliJ IDEA plugin that provides a unified AI workbench inside the IDE.
+**Do not implement the complete application during this planning task.**
 
-The long-term system must support:
+Generate the actual instruction and planning files. Do not merely describe what should be created.
 
-- local language models;
-- cloud language models;
-- configurable model routing;
-- project-aware grounding;
-- AGENT.md workflows;
-- SKILL.md workflows;
-- prompt files loaded from Markdown;
-- one-shot and few-shot prompting;
-- structured model output;
-- security guards;
-- model generation parameters;
-- reasoning/thinking configuration;
-- controlled tool usage;
-- evaluation;
-- deterministic checks;
-- LLM-as-a-judge;
-- dataset management;
-- supervised fine-tuning;
-- LoRA / QLoRA;
-- checkpoints;
-- training orchestration;
-- optional from-scratch training;
-- supervised training guidance by a stronger model.
+## 2. Project authority and discovery
 
-The plugin must become a useful general IntelliJ IDEA extension, not a project-specific one-off implementation.
+Before generating files:
 
----
+1. Read root `AGENTS.md`.
+2. Read root `README.md`.
+3. Discover and read relevant subsystem `README.md` files.
+4. Inspect the actual Gradle project and directory tree.
+5. Inspect existing Kotlin skeletons, resources and plugin descriptor.
+6. Inspect existing `.ai/` and `.codex/skills/` structures.
+7. Inspect existing development documentation and implementation plans.
+8. Read the most recent `_local/reviews/ux-review.md`, if present.
 
-# 3. Core product principle
+The project README hierarchy defines product intent, architecture and subsystem responsibilities.
 
-The plugin must NOT unnecessarily reimplement capabilities already provided by IntelliJ IDEA or existing system tools.
+Actual code and configuration establish the implementation state.
 
-Do not recreate:
+Do not invent missing capabilities or assume that skeleton files contain working functionality.
 
-- code editor;
-- Project tool window;
-- terminal;
-- Git client;
-- debugger;
-- test runner;
+Do not change the root README merely to fit a preferred architecture.
+
+If documentation and code disagree, record the discrepancy and plan the smallest appropriate correction.
+
+## 3. Existing skills and responsibility boundaries
+
+Recognize the following development skills:
+
+### skill-readme-settings-and-structure
+
+Responsible for:
+
+- IntelliJ IDEA configuration;
+- development environment;
+- Gradle and dependencies;
+- project directories;
+- initial Kotlin skeletons;
+- project bootstrap validation.
+
+Do not duplicate these responsibilities.
+
+### skill-ux-review
+
+Responsible for:
+
+- independent implementation review;
+- README conformance;
+- dependency and structure coherence;
+- IntelliJ UX;
+- security requirements;
+- course-concept coverage;
+- prioritized remediation findings.
+
+Use its existing report as optional planning input.
+
+Do not overwrite this skill or its reports.
+
+### skill-integrated-ai-workbench
+
+This skill is responsible for:
+
+- generating runtime agent definitions;
+- generating runtime workflow skills;
+- mapping README requirements to actual implementation tasks;
+- sequencing tasks according to dependencies;
+- generating implementation-ready Codex skills;
+- defining acceptance and verification criteria.
+
+Do not recreate the two existing skills under new names.
+
+Keep this planning skill separate from implementation and review activities.
+
+## 4. Architectural principles
+
+Preserve the architecture defined in README.md.
+
+The project is an IntelliJ Platform plugin with:
+
+- Kotlin;
 - Gradle;
-- Maven;
-- run configurations;
-- file system browser;
-- Docker;
-- compiler;
-- standard IDE inspections.
-
-Use IntelliJ Platform APIs and external runtimes instead.
-
-Example:
-
-```text
-IntelliJ UI
-    ↓
-AI Workbench plugin
-    ↓
-TrainingRuntime abstraction
-    ↓
-Python / PyTorch / CUDA / Transformers / external process
-```
-
-The plugin owns:
-
-- orchestration;
-- configuration;
-- AI workflow state;
-- grounding;
+- JDK 21 baseline;
+- IntelliJ-native UI;
+- local-first model execution;
+- user-supplied language models;
+- agent, skill and model-profile abstractions;
+- controlled grounding;
 - prompt composition;
-- routing;
-- validation;
-- security;
-- result presentation;
-- evaluation;
-- reproducibility.
+- input and output security;
+- structured model responses;
+- deterministic evaluation;
+- LLM-as-a-Judge;
+- optional multi-agent orchestration.
 
-The underlying model runtime or training framework may remain external.
+The Base Plugin must work without mandatory cloud services, another AI plugin or another independently operated AI
+application.
 
----
+Cloud providers, advanced RAG, MCP extensions and model training are future extension capabilities.
 
-# 4. Product value
+Do not generate current MVP implementation tasks for deferred features unless explicitly requested.
 
-The plugin exists because current AI development workflows are fragmented across multiple applications.
+### Architecture boundaries
 
-Typical current workflow:
+Respect the README's conceptual boundaries:
 
-```text
-IntelliJ IDEA
-+ separate AI plugin
-+ LM Studio
-+ llama.cpp
-+ terminal
-+ Python scripts
-+ training tools
-+ cloud console
-+ prompt files
-+ evaluation scripts
-+ model manager
-```
+- `base/frontend/` — IntelliJ UI and user interaction.
+- `base/shared/` — shared models, contracts and typed data.
+- `base/backend/` — project services, model/runtime management, security and evaluation.
 
-Desired workflow:
+These may be implemented as packages rather than separate physical Gradle modules.
 
-```text
-IntelliJ IDEA
-        ↓
-Integrated AI Workbench
-        ↓
-local / cloud / training / evaluation runtimes
-```
+Avoid unnecessary module proliferation.
 
-The developer should be able to stay inside IntelliJ IDEA for the practical workflow.
+Use the actual repository layout when determining precise paths.
 
----
+## 5. Native local LLM inference — critical requirement
 
-# 5. Local-first but provider-independent
+The Base Plugin must provide a genuinely integrated local inference capability.
 
-The architecture must not be hard-coded to specific single model provider.
+This means a developer can select an available local model and execute inference through Integrated AI Workbench without
+depending on LM Studio, Ollama or another separately operated AI application.
 
-Use a provider abstraction.
+A local inference engine may be implemented through an appropriate native library or a plugin-managed runtime process.
 
-Conceptually:
+Do not confuse native Workbench integration with a requirement to implement transformer inference mathematics from
+scratch.
 
-```text
-ModelProvider
-├── LocalOpenAiCompatibleProvider
-├── LlamaCppProvider
-├── CloudModelProvider
-├── GoogleGenAiProvider
-├── OpenAiCompatibleCloudProvider
-└── OpenAiCompatibleLocalFirstIntegration
-```
+### Required architectural separation
 
-Do not require users to install another IntelliJ AI plugin.
+Maintain distinct responsibilities for:
 
-External model servers may be used when appropriate, but they must be accessed through this plugin's own provider
-integration and ability to integrate any local model right inside IDE to open project as part of it.
+**Model Registry**
 
-A developer must be able to configure:
+- discovers or registers user-supplied models;
+- stores model metadata and locations;
+- supports project-local and external model paths;
+- does not store model binaries in Git.
 
-```text
-local model
-cloud model
-teacher model
-judge model
-embedding model
-training target model
-local model integration to open project (models folder inside project file system)
-```
+**Hardware Capability Detection**
 
-independently.
+- discovers available CPU and memory resources;
+- detects GPUs, available memory and supported backends where possible;
+- records capability and compatibility information;
+- does not assume specific hardware exists.
 
----
+**Runtime Manager**
 
-# 6. Model profiles
+- selects a compatible execution backend;
+- manages runtime installation or discovery;
+- controls model loading and unloading;
+- starts and stops runtime processes where applicable;
+- manages lifecycle, health checks, resources, timeouts and failures.
 
-Create a model profile concept.
+**Local Inference Adapter**
 
-A profile represents a model plus inference configuration.
+- translates typed model requests into runtime-specific operations;
+- supports supported sampling and reasoning parameters;
+- returns structured inference results;
+- handles failures and cancellation.
 
-Example conceptual configuration:
+**Model Profile**
 
-```yaml
-name: local-coder
-provider: local-openai-compatible
-model: qwen-coder
+- links a model to compatible runtime configuration;
+- defines generation parameters;
+- stores non-secret configuration;
+- supports independent agent assignments.
 
-generation:
-  temperature: 0.2
-  top_p: 0.9
-  max_tokens: 4096
-  timeout_seconds: 60
+**Agent**
 
-reasoning:
-  level: medium
+- applies role, policy, allowed tools and skill instructions;
+- refers to a configured model profile;
+- does not own the inference engine.
 
-security:
-  cloud_allowed: false
+### Runtime selection
 
-prompt:
-  agent: .ai/agents/java-backend/AGENT.md
-  skill: .ai/skills/controller-review/SKILL.md
-```
+Before selecting a runtime implementation:
 
-The implementation must be extensible enough to support provider-specific parameters.
+1. Inspect project requirements.
+2. Identify candidate native or plugin-managed local inference backends.
+3. Evaluate supported model formats and platforms.
+4. Examine CPU/GPU support, licensing and integration constraints.
+5. Evaluate startup, cancellation, memory management and failure recovery.
+6. Choose the smallest viable implementation for the first working inference flow.
+7. Document the decision and rejected alternatives.
 
-Do not assume that all providers support the same parameters.
+A llama.cpp-based managed runtime is a valid candidate, but do not assume it is already selected or implemented.
 
-Make difference of local model intended to be integrated in project functionality and is part of future application
-runtime and second use case where local model is used as integrated tool inside IntelliJ IDEA.
+An HTTP interface to a plugin-managed local process is acceptable when properly controlled.
 
----
+The plugin must own that process's lifecycle.
 
-# 7. Model router
+Do not make users manually start a separate model server as a prerequisite for normal Base Plugin operation.
 
-Design a model-routing layer.
+### Runtime security
 
-The system must eventually support rules such as:
+Where applicable, require:
 
-```text
-coding
-→ local-coder
+- verified runtime binaries;
+- supported runtime versions;
+- controlled installation locations;
+- explicit consent before downloads;
+- license compliance;
+- restricted local process access;
+- loopback-only network binding where applicable;
+- safe temporary files;
+- process cleanup;
+- model-path validation;
+- execution timeout and cancellation.
 
-architecture-review
-→ cloud-supervisor
+Do not bundle or automatically download large model binaries.
 
-dataset-generation
-→ teacher-model
-
-evaluation
-→ judge-model
-
-training
-→ local-target-model
+Offline inference must be possible after the required local runtime and user-supplied model resources are available.
 
-sensitive-data
-→ local-only
-
-integrated-runtime-model
-→ local-project-model
-```
-
-Routing priorities:
-
-```text
-security policy
-    ↓
-explicit user choice
-    ↓
-workflow configuration
-    ↓
-router default
-```
-
-A model or agent must never override a security restriction.
-
-Any new project application specific integrated local model instruction files like SYSTEM.md, AGENT.md, TOOLS.md,
-SKILL.md have subfolders inside models folder in project tree used only by local models located in this models folder
-and as project context or task for generation for other models used with IDE for any project completion related tasks.
-
----
-
-# 8. IntelliJ-native architecture
-
-The project must use IntelliJ Platform architecture appropriately.
-
-Prefer project-level services for project-specific AI state.
-
-Conceptual architecture:
-
-```text
-IntelliJ IDEA
-│
-├── existing IDE capabilities
-│
-└── AI Workbench Plugin
-    │
-    ├── UI
-    │   └── AI Workbench Tool Window
-    │
-    ├── Model Registry
-    ├── Model Router
-    ├── Provider Layer
-    ├── Context / Grounding Engine
-    ├── Prompt Engine
-    ├── Security Layer
-    ├── Agent Engine
-    ├── Tool Engine
-    ├── Structured Output Layer
-    ├── Evaluation Engine
-    ├── LLM Judge
-    ├── Run History
-    └── Training Workbench
-```
-
-Keep clear package boundaries.
-
-Do not place all logic inside the Tool Window class. Create git ignored folder in project tree when this plugin is
-applied to project and include there all this project specific variable folders for AI model instruction files and
-CONFIGURATION.toml, SETTINGS.json and other this kind of files as if applicable.
+## 6. Runtime agent generation
 
----
+Generate meaningful agent definitions under:
 
-# 9. Recommended package structure
-
-Use a clear namespace appropriate for the project.
-
-Conceptual structure:
-
-```text
-src/main/kotlin/.../ai-workbench/
-├── action/
-├── agent/
-├── config/
-├── context/
-├── evaluation/
-├── model/
-│   ├── provider/
-│   ├── profile/
-│   └── routing/
-├── prompt/
-├── security/
-├── service/
-├── structured/
-├── tool/
-├── training/
-├── ui/
-│   └── toolwindow/
-└── util/
-```
-
-Resources:
-
-```text
-src/main/resources/
-├── META-INF/
-│   └── plugin.xml
-└── prompts/
-    └── defaults/
-```
-
-Project-level AI configuration:
+`.ai/agents/<agent-name>/AGENT.md`
 
-```text
-.ai/
-├── agents/
-│   └── default/
-│       └── AGENT.md
-├── skills/
-│   └── default/
-│       └── SKILL.md
-├── prompts/
-├── profiles/
-└── evaluation/
-```
-
-Any provider specific API KEY's should be located together with other settings per specific provider but never exposed
-as characters but hidden *******.
+Inspect existing files before creating or changing them.
 
----
+Do not overwrite useful existing instructions unnecessarily.
 
-# 10. Graduation-project AI requirements
+### Initial agent roles
 
-The implementation and documentation must explicitly demonstrate all required AI concepts.
+Derive the minimal required roles from README.md and the current milestone.
 
-Mandatory:
+Potential roles include:
 
-- Grounding
-- Chain of Thought / reasoning capability
-- System and user roles/prompts
-- Basic security
-- input sanitation
-- output sanitation
-- input length caps
-- context limits
-- one-shot or few-shot prompting
-- examples inside prompts
-- structured output
-- generation parameters
-- thinking/reasoning level
-- sampling configuration
+**Default / General Advisor**
 
-Bonus requirements that must also be implemented if feasible:
+- receives user tasks;
+- applies grounding and security restrictions;
+- selects allowed skills;
+- executes through an assigned model profile;
+- presents validated results.
 
-- LLM-as-a-judge
-- prompts loaded from Markdown files
+**Coding Agent**
 
-For this project both bonus items are considered part of the intended design.
+- processes source-code-related tasks;
+- uses explicitly permitted project context and tools;
+- produces structured implementation guidance or authorized changes.
 
----
+**Judge Agent**
 
-# 11. Grounding
+- evaluates model output using defined criteria;
+- produces structured evaluation results;
+- does not override deterministic failures.
 
-Grounding must be a first-class subsystem.
+Specialized agents should be generated only when their responsibilities and integration contracts are justified.
 
-Create a `ContextService` or equivalent abstraction.
+A single model may serve multiple agents through different profiles or role configurations.
 
-Potential grounding sources:
+Do not require one model per agent.
 
-```text
-active editor file
-selected code
-selected project files
-README files
-project documentation
-API specification
-database schema
-Git diff
-compiler output
-test output
-AGENT.md
-SKILL.md
-other explicitly approved files
-```
+### Every AGENT.md must define
 
-Never automatically send the entire project to a model.
+1. Agent name and responsibility.
+2. Intended operating context.
+3. Model-profile selection requirements.
+4. Allowed skills.
+5. Allowed tool capabilities.
+6. Grounding scope and context restrictions.
+7. Security and confidentiality rules.
+8. Expected input.
+9. Expected structured output.
+10. Error and failure behavior.
+11. Conditions for requesting user authorization.
+12. Limitations and unsupported operations.
 
-Grounding must support controlled selection.
+Do not hard-code a particular installed language model.
 
-Required controls:
+Do not claim an agent has tools or capabilities that have not been implemented.
 
-```text
-allowed project roots
-maximum number of files
-maximum file size
-maximum context characters/tokens
-allowed file types
-binary-file exclusion
-secret filtering
-cloud/local policy
-```
+Security-critical restrictions must also be represented in programmatically enforceable application architecture.
 
-The UI must eventually make visible which context was used.
+## 7. Runtime skill generation
 
----
+Generate task-oriented runtime instructions under:
 
-# 12. Prompt architecture
+`.ai/skills/<skill-name>/SKILL.md`
 
-Keep system instructions, task instructions, project context and user input conceptually separate.
+Runtime skills are consumed by Integrated AI Workbench agents, not by Codex directly.
 
-Preferred composition:
+Create the minimum set needed to support the planned Base Plugin workflow.
 
-```text
-SYSTEM
-→ AGENT.md
+Potential initial workflows:
 
-TASK / WORKFLOW INSTRUCTIONS
-→ SKILL.md
+- project-context-grounding;
+- prompt-composition;
+- structured-response;
+- secure-tool-execution;
+- response-evaluation.
 
-GROUNDING CONTEXT
-→ ContextService output
+Do not create a separate skill when the behavior properly belongs to an ordinary application service rather than an
+agent workflow.
 
-USER
-→ actual user task
-```
+### Every runtime SKILL.md must define
 
-Where the model API supports native roles, preserve them instead of flattening everything into one string.
-
----
-
-# 13. Markdown prompt files
-
-Prompt files must be external to code.
-
-Required concepts:
-
-```text
-AGENT.md
-SKILL.md
-PROMPT.md
-```
-
-The plugin must load prompt content from Markdown at runtime.
-
-Changing a prompt must not require recompiling the plugin.
-
-Recommended project layout:
-
-```text
-.ai/
-├── agents/
-│   └── java-backend/
-│       └── AGENT.md
-├── skills/
-│   └── controller-review/
-│       └── SKILL.md
-└── prompts/
-    └── evaluator.md
-```
-
----
-
-# 14. AGENT.md semantics
-
-`AGENT.md` defines the durable role and constraints of an agent.
-
-It may define:
-
-- identity;
-- responsibility;
-- communication behaviour;
+- name and purpose;
+- compatible agent roles;
+- prerequisite capabilities;
+- inputs and outputs;
+- workflow sequence;
 - allowed tools;
-- forbidden actions;
-- security constraints;
-- project scope;
-- high-level operating rules.
+- safety constraints;
+- relevant configuration;
+- completion conditions;
+- failure handling;
+- concrete examples where useful.
 
-Do not make application security dependent only on text in AGENT.md.
+At least one applicable runtime skill must demonstrate one-shot or few-shot prompting.
 
-Programmatic enforcement must exist separately.
+Examples must be relevant to the project and must not contain secrets.
 
----
+Distinguish:
 
-# 15. SKILL.md semantics
+- an instruction file that exists;
+- a prompt loader that can read it;
+- a functional agent that actually uses it.
 
-`SKILL.md` defines a repeatable task-specific workflow.
+Do not claim these three states are equivalent.
 
-It may define:
+## 8. Codex task skills — separate responsibility
 
-- task goal;
-- prerequisites;
-- accepted input;
-- workflow steps;
-- expected output;
-- validation rules;
-- tool sequence;
-- one-shot examples;
-- few-shot examples;
-- evaluation rubric.
+Development tasks require a separate class of skills.
 
-Example conceptual hierarchy:
+Location:
 
-```text
-AGENT
-Java Backend Agent
-
-SKILL
-Spring Controller Review
-```
-
-One agent may support multiple skills.
-
----
-
-# 16. One-shot and few-shot prompting
-
-Implement support for prompt examples.
-
-At least one graduation-project demonstration must compare:
-
-```text
-zero-shot
-vs
-one-shot or few-shot
-```
-
-A skill may contain:
-
-```markdown
-## Examples
-
-### Example 1
-
-Input:
-Create GET /api/courses.
-
-Expected output:
-Controller → Service → Repository → DTO.
-
-### Example 2
-
-Input:
-Create POST /api/location.
-
-Expected output:
-Controller → Service → Repository → Mapper → DTO.
-```
-
-Examples belong in the prompt/skill definition, not hard-coded into Kotlin business logic.
-
----
-
-# 17. Reasoning / thinking
-
-Support provider reasoning or thinking configuration when available.
-
-Conceptual levels:
-
-```text
-none
-medium
-high
-```
-
-Do NOT attempt to expose a model's hidden private chain-of-thought if this is not a subject of open project specific
-task.
-
-Do NOT design UI that dumps hidden internal reasoning.
-
-Instead expose a concise model-generated reasoning summary if useful.
-
-Example structured response:
-
-```json
-{
-  "result": "...",
-  "reasoningSummary": "The controller delegates business logic to the service and keeps request validation at the boundary.",
-  "confidence": 0.91
-}
-```
-
-The graduation project may document this as controlled use of model reasoning without exposing private internal
-reasoning traces.
-
----
-
-# 18. Generation and sampling parameters
-
-Model profiles must support applicable inference parameters such as:
-
-```text
-temperature
-top_p
-max_tokens
-timeout
-seed
-reasoning/thinking level
-```
-
-Provider capability differences must be handled cleanly.
-
-Unsupported parameters must not cause invalid requests.
-
-The UI should eventually show editable parameters per model profile.
-
----
-
-# 19. Structured output
-
-Structured model output is mandatory for internal workflows.
-
-Avoid parsing arbitrary prose when a machine-readable result is expected.
-
-Example result:
-
-```json
-{
-  "status": "SUCCESS",
-  "answer": "...",
-  "reasoningSummary": "...",
-  "usedContext": [
-    "ChatbotService.java",
-    "AGENT.md"
-  ]
-}
-```
-
-Example evaluation:
-
-```json
-{
-  "passed": true,
-  "score": 0.94,
-  "criteria": {
-    "correctness": 0.95,
-    "security": 1.0,
-    "instructionFollowing": 0.88
-  },
-  "feedback": "..."
-}
-```
-
-Create typed internal DTO/model classes.
-
-Validate structured output before passing it to later workflow stages.
-
----
-
-# 20. Security architecture
-
-Security must be implemented programmatically.
-
-Target flow:
-
-```text
-User Input
-    ↓
-InputGuard
-    ↓
-ContextBuilder
-    ↓
-PromptBuilder
-    ↓
-ModelProvider
-    ↓
-StructuredOutputValidator
-    ↓
-ToolPermissionGuard
-    ↓
-Tool execution
-```
-
-Required security controls:
-
-```text
-maximum input length
-maximum context size
-maximum file count
-maximum individual file size
-allowed project roots
-file type filtering
-binary exclusion
-secret detection / masking
-output sanitation
-structured schema validation
-tool allowlist
-tool timeout
-cloud/local data policy
-```
-
-Secrets such as:
-
-```text
-API keys
-passwords
-tokens
-private keys
-.env values
-```
-
-must not be silently sent to a cloud provider.
-
-Do not log secrets.
-
----
-
-# 21. Tool architecture
-
-Do not give models unrestricted operating-system access.
-
-Expose specific tools through controlled adapters.
-
-Conceptual tools:
-
-```text
-ReadFileTool
-ProjectSearchTool
-GitDiffTool
-CompileTool
-TestTool
-RunConfigurationTool
-```
-
-Potential future tools:
-
-```text
-TerminalTool
-DatabaseSchemaTool
-HttpRequestTool
-McpTool
-```
-
-Each tool should define:
-
-```text
-name
-description
-input schema
-permission requirement
-timeout
-structured result
-```
-
-High-impact operations must require explicit permission.
-
-Read-only operations should be preferred by default.
-
----
-
-# 22. MCP compatibility
-
-The architecture should allow MCP integrations later.
-
-Do not build the initial system around MCP exclusively.
-
-Treat MCP as one possible external tool/provider integration mechanism.
-
-Conceptually:
-
-```text
-ToolRegistry
-├── NativeIntelliJTool
-├── InternalTool
-└── McpToolAdapter
-```
-
-The plugin must remain functional without requiring an MCP plugin from another vendor.
-
----
-
-# 23. Evaluation engine
-
-Evaluation must support both deterministic and model-based checks.
-
-Evaluation order:
-
-```text
-Model Output
-    ↓
-Deterministic checks
-    ├── structured schema
-    ├── compile
-    ├── tests
-    ├── required files
-    ├── forbidden content
-    └── security rules
-    ↓
-LLM Judge
-```
-
-A deterministic failure must not be overruled by an LLM judge.
-
-Example:
-
-```text
-compile = FAIL
-→ overall technical result cannot be PASS
-```
-
----
-
-# 24. LLM-as-a-judge
-
-Implement an extensible judge abstraction.
-
-Conceptually:
-
-```text
-JudgeService
-    ↓
-JudgeModelProfile
-    ↓
-EvaluationRubric
-    ↓
-Structured JudgeResult
-```
-
-Example:
-
-```json
-{
-  "score": 0.91,
-  "passed": true,
-  "criteria": {
-    "correctness": 0.95,
-    "instructionFollowing": 0.90,
-    "security": 1.0,
-    "maintainability": 0.80
-  },
-  "feedback": "The result is correct but duplicates project logic."
-}
-```
-
-The judge prompt should be loadable from Markdown.
-
----
-
-# 25. Training Workbench
-
-The architecture must reserve a real subsystem for model training.
-
-The training layer should eventually support:
-
-```text
-dataset management
-dataset validation
-train/validation split
-supervised fine-tuning
-LoRA
-QLoRA
-evaluation
-checkpoint management
-model export
-```
-
-Future capability:
-
-```text
-from-scratch training
-```
-
-Do NOT attempt to rewrite PyTorch or Transformers inside the plugin.
-
-Use a runtime adapter.
-
-Conceptually:
-
-```text
-TrainingService
-    ↓
-TrainingRuntime
-    ├── LocalPythonRuntime
-    ├── DockerTrainingRuntime
-    └── RemoteTrainingRuntime
-```
-
----
-
-# 26. Supervised training live guidance
-
-The architecture must allow a stronger model to supervise training of a smaller target model.
-
-Concept:
-
-```text
-Teacher / Supervisor Model
-        ↓
-AGENT + SKILL
-        ↓
-Task / example generation
-        ↓
-Target lightweight model
-        ↓
-Model output
-        ↓
-Deterministic evaluation
-        ↓
-LLM Judge
-        ↓
-Supervisor feedback
-        ↓
-Dataset improvement
-        ↓
-Next training iteration
-```
-
-Potential specialized tasks:
-
-```text
-Spring controller generation
-REST API design
-SQL generation
-code review
-documentation generation
-project-specific coding conventions
-```
-
-The target is not necessarily to produce a general-purpose LLM.
-
-The target may be a lightweight model specialized for a narrow, repeatable agentic task.
-
----
-
-# 27. Agentic training objective
-
-Support the conceptual goal:
-
-```text
-same AGENT
-+
-same SKILL
-+
-same grounding rules
-+
-same tool set
-+
-same evaluation
-→
-repeatable correct behaviour
-```
-
-A useful research question for the graduation project is:
-
-> Can a lightweight local model become reliable enough for a narrow agentic software-engineering task when guided by a
-> stronger teacher model, grounded project context, skill instructions, few-shot examples and repeated evaluation?
-
-The implementation should make this measurable.
-
----
-
-# 28. Reproducibility
-
-Every important run should have a reproducible run record.
-
-Conceptual `RunRecord` / `TrainingRecipe`:
-
-```text
-run id
-timestamp
-project
-base model
-model version/hash
-provider
-model profile
-temperature
-top_p
-max_tokens
-reasoning level
-dataset version
-AGENT version/hash
-SKILL version/hash
-prompt version/hash
-grounding sources
-tool configuration
-random seed
-judge model
-evaluation result
-training parameters
-checkpoint
-```
-
-Do not depend only on human memory or terminal logs.
-
----
-
-# 29. AI Workbench Tool Window
-
-Create one primary IntelliJ Tool Window.
-
-Working name:
-
-```text
-AI Workbench
-```
-
-Long-term sections:
-
-```text
-AI Workbench
-├── Chat
-├── Context
-├── Models
-├── Agents
-├── Skills
-├── Tools
-├── Training
-├── Evaluation
-└── Runs
-```
-
-Do not implement all advanced sections as fake fully working UI during the first step.
-
-Build real functionality incrementally.
-
----
-
-# 30. Initial MVP
-
-The first working version must be intentionally small but architecturally correct.
-
-Required MVP:
-
-```text
-IntelliJ Tool Window
-        ↓
-Model Profile
-        ↓
-Provider abstraction
-        ↓
-AGENT.md
-        ↓
-SKILL.md
-        ↓
-User prompt
-        ↓
-Grounded project context
-        ↓
-Input/security validation
-        ↓
-Model request
-        ↓
-Structured response
-        ↓
-Output validation
-        ↓
-Result displayed in Tool Window
-```
-
-The MVP should support at least one provider end-to-end.
-
-Prefer an OpenAI-compatible HTTP provider abstraction first if it allows easy testing with multiple local runtimes.
-
-Do not bind the whole architecture to that provider.
+`.codex/skills/skill-iwb-task-<task-slug>/SKILL.md`
 
----
+These skills instruct Codex to implement application code.
 
-# 31. Graduation-project demonstration workflow
+They are not runtime skills loaded by the Integrated AI Workbench plugin.
 
-The finished graduation-project MVP should demonstrate a complete flow:
+### Rules
 
-```text
-IntelliJ project
-      ↓
-selected grounding
-      ↓
-AGENT.md
-      ↓
-SKILL.md with few-shot example
-      ↓
-Model Profile
-      ↓
-local or cloud model
-      ↓
-configured thinking/sampling
-      ↓
-structured output
-      ↓
-security validation
-      ↓
-deterministic evaluation
-      ↓
-LLM-as-a-judge
-      ↓
-stored run result
-```
-
-The demonstration should visibly prove the assessment criteria instead of only describing them in README.
-
----
-
-# 32. Initial files to create
-
-Create an appropriate IntelliJ Platform Gradle plugin project.
-
-At minimum establish files conceptually equivalent to:
-
-```text
-build.gradle.kts
-settings.gradle.kts
-gradle.properties
-
-src/main/kotlin/.../ai-workbench/
-├── ui/toolwindow/
-│   ├── AiWorkbenchToolWindowFactory.kt
-│   └── AiWorkbenchPanel.kt
-│
-├── model/
-│   ├── ModelProvider.kt
-│   ├── ModelRequest.kt
-│   ├── ModelResponse.kt
-│   └── profile/
-│       └── ModelProfile.kt
-│
-├── service/
-│   └── AiWorkbenchService.kt
-│
-├── context/
-│   ├── ContextService.kt
-│   └── GroundingContext.kt
-│
-├── prompt/
-│   ├── PromptLoader.kt
-│   └── PromptComposer.kt
-│
-├── security/
-│   ├── InputGuard.kt
-│   ├── SecretSanitizer.kt
-│   └── OutputGuard.kt
-│
-├── structured/
-│   └── StructuredResponseValidator.kt
-│
-├── evaluation/
-│   ├── EvaluationService.kt
-│   └── JudgeService.kt
-│
-└── training/
-    ├── TrainingService.kt
-    └── TrainingRuntime.kt
-
-src/main/resources/
-└── META-INF/
-    └── plugin.xml
-
-.ai/
-├── agents/
-│   └── default/
-│       └── AGENT.md
-├── skills/
-│   └── default/
-│       └── SKILL.md
-└── prompts/
-    └── judge.md
-
-docs/
-├── ARCHITECTURE.md
-├── SECURITY.md
-├── AI-REQUIREMENTS.md
-└── ROADMAP.md
-
-README.md
-```
-
-Adjust exact names when required by IntelliJ Platform conventions.
-
----
-
-# 33. Initial UI behaviour
-
-The initial Tool Window must contain at minimum:
-
-```text
-AI Workbench
-
-Model: [selected model profile]
-
-Agent: [selected AGENT.md]
-Skill: [selected SKILL.md]
-
-Context:
-[selected grounding summary]
-
-Prompt:
-[text input]
-
-[Run]
-
-Result:
-[structured/displayed response]
-```
-
-The implementation may begin simpler but should evolve toward this shape.
-
-Do not create decorative controls that are not wired to real functionality.
-
----
-
-# 34. Initial provider behaviour
-
-Implement the provider API cleanly.
-
-Example conceptual interface:
-
-```kotlin
-interface ModelProvider {
-    fun id(): String
-
-    suspend fun generate(
-        request: ModelRequest
-    ): ModelResponse
-}
-```
-
-Actual implementation may differ according to IntelliJ/Kotlin architecture.
-
-The provider must not directly access arbitrary project files.
-
-Context must already have been prepared by the grounding layer.
-
----
-
-# 35. Model request concept
-
-A request should carry explicit structured data.
-
-Conceptually:
-
-```text
-systemPrompt
-skillPrompt
-userPrompt
-groundingContext
-modelProfile
-generationParameters
-requestedOutputSchema
-```
-
-Avoid passing a single uncontrolled concatenated string throughout the entire application.
-
----
-
-# 36. Security defaults
-
-Default behaviour must be conservative.
-
-Preferred defaults:
-
-```text
-file access → read-only
-external tool execution → disabled unless explicitly enabled
-cloud sharing → explicit configuration
-secret files → excluded
-binary files → excluded
-huge files → excluded
-project root escape → forbidden
-tool commands → allowlisted
-structured output validation → enabled
-```
-
-Never silently execute a model-provided shell command.
-
----
-
-# 37. Configuration and secrets
-
-Do not commit API keys.
-
-Support secure configuration through appropriate mechanisms such as:
-
-- environment variables;
-- IntelliJ PasswordSafe for secret persistence;
-- non-secret project settings;
-- user-level settings.
-
-Do not store secrets in:
-
-```text
-README
-AGENT.md
-SKILL.md
-plugin.xml
-Git-tracked properties files
-```
-
----
-
-# 38. Existing development workflow support
-
-The design should support workflows common in full-stack software projects, including:
-
-```text
-Java
-Spring Boot
-REST APIs
-Vue
-JavaScript
-Postgres
-SQL
-Swagger / OpenAPI
-Git
-Gradle
-project documentation
-local LLMs
-cloud LLMs
-AGENT.md
-SKILL.md
-```
-
-Do not hard-code behavior specifically for these technologies.
-
-Implement them through reusable grounding, agent, skill and tool abstractions.
-
----
-
-# 39. Coding standards
-
-Use clean architecture principles without unnecessary abstraction.
-
-Requirements:
-
-- small focused classes;
-- dependency inversion where useful;
-- interfaces at genuine extension boundaries;
-- no giant god service;
-- no giant Tool Window class;
-- no provider-specific logic inside generic UI;
-- no business logic inside Swing listeners;
-- no secrets in logs;
-- no hidden global mutable state;
-- no duplicate implementations of the same policy.
-
-Prefer constructor injection or IntelliJ service patterns where appropriate.
-
-Use descriptive names.
-
-Do not create abstraction merely to increase file count.
-
----
-
-# 40. Documentation requirements
-
-Create documentation while implementing.
-
-`README.md` must explain:
-
-```text
-what the plugin does
-why it exists
-how to run the plugin
-current MVP capabilities
-supported providers
-configuration
-security model
-project status
-known limitations
-roadmap
-```
-
-`docs/AI-REQUIREMENTS.md` must explicitly map graduation requirements:
-
-```text
-Grounding
-Chain of Thought / reasoning
-System + user roles
-Basic security
-One-shot / few-shot
-Structured output
-Parameters
-Thinking level
-Sampling
-LLM-as-a-judge
-Markdown prompts
-```
-
-For every item document:
-
-```text
-requirement
-implementation
-relevant class/file
-demonstration method
-current status
-```
-
-`docs/ARCHITECTURE.md` must explain component relationships.
-
-`docs/SECURITY.md` must explain actual programmatic controls.
-
-`docs/ROADMAP.md` must clearly distinguish:
-
-```text
-implemented
-MVP
-planned
-future research
-```
-
-Do not claim unfinished functionality as implemented.
-
----
-
-# 41. Testing requirements
-
-Create tests for logic that can be tested independently of the IDE UI.
-
-Priority:
-
-```text
-PromptLoader
-PromptComposer
-InputGuard
-SecretSanitizer
-Context limits
-Model profile validation
-Structured output validation
-Model router
-Evaluation logic
-```
-
-Provider integration should be testable using a fake/mock provider.
-
-Avoid tests that depend on a real paid cloud API by default.
-
----
-
-# 42. Development workflow
-
-Work incrementally.
-
-Use this order unless repository state requires a justified change.
-
-## Phase 1 — project bootstrap
-
-1. Create IntelliJ Platform plugin project.
-2. Configure Gradle.
-3. Configure plugin metadata.
-4. Confirm `build`.
-5. Confirm `runIde`.
-6. Create AI Workbench Tool Window.
-7. Display a minimal working UI.
-
-Acceptance:
-
-```text
-plugin builds
-sandbox IntelliJ starts
-AI Workbench Tool Window is visible
-```
-
----
-
-## Phase 2 — core abstractions
+- One cohesive implementation task should correspond to one Codex task skill.
+- A task may touch several files when they implement one complete responsibility.
+- Do not create a separate task merely for every class or source file.
+- Do not create duplicate tasks for already completed functionality.
+- Keep task scope small enough for focused implementation and review.
+- Reuse existing project conventions, source paths and abstractions.
+- Prefer a working vertical slice over many disconnected placeholders.
 
-Create:
+Each generated task skill must be directly executable by Codex.
 
-```text
-ModelProvider
-ModelProfile
-ModelRequest
-ModelResponse
-AiWorkbenchService
-```
-
-Create a fake provider first if useful.
-
-Acceptance:
-
-```text
-user enters prompt
-request travels through service/provider abstraction
-response is displayed
-```
-
----
-
-## Phase 3 — Markdown prompts
-
-Implement:
-
-```text
-PromptLoader
-AGENT.md
-SKILL.md
-PromptComposer
-```
-
-Acceptance:
-
-```text
-editing AGENT.md or SKILL.md changes the runtime prompt
-without recompiling plugin code
-```
+Do not generate vague instructions such as "implement the service according to best practices."
 
----
+## 9. Implementation backlog
 
-## Phase 4 — grounding
+Create and maintain:
 
-Implement controlled project context.
+`docs/development/tasks/README.md`
 
-Start with:
+This is the canonical development backlog.
 
-```text
-active file
-selected text
-explicit selected files
-```
+For each planned task, create:
 
-Acceptance:
+`docs/development/tasks/TASK-<number>-<slug>.md`
 
-```text
-UI shows which context is included
-model request receives only approved context
-```
+And its corresponding Codex execution skill:
 
----
+`.codex/skills/skill-iwb-task-<slug>/SKILL.md`
 
-## Phase 5 — security
+Use stable IDs.
 
-Implement:
+Do not renumber existing tasks merely because priorities change.
 
-```text
-input length cap
-context cap
-path validation
-secret sanitation
-output validation
-```
+Before adding tasks, inspect any existing task plan and preserve completed work.
 
-Acceptance:
+### Each task specification must contain
 
-```text
-oversized or forbidden input is rejected safely
-secrets are not included in outbound cloud context
-```
+**Identity**
 
----
+- stable task ID;
+- descriptive title;
+- priority;
+- implementation status;
+- affected subsystem.
 
-## Phase 6 — structured output
+**Reason**
 
-Introduce typed structured responses.
+- corresponding README requirement;
+- intended user or architectural value;
+- relevant AI course concept, if any.
 
-Acceptance:
+**Dependencies**
 
-```text
-invalid model structure is rejected
-valid structure is displayed
-```
+- required preceding tasks;
+- relevant existing interfaces and services;
+- necessary development environment.
 
----
+**Scope**
 
-## Phase 7 — model parameters
+- files to inspect;
+- files expected to be created or modified;
+- relevant architecture boundaries;
+- implementation responsibilities;
+- explicitly excluded functionality.
 
-Implement profile settings:
+**Contract**
 
-```text
-temperature
-top_p
-max_tokens
-timeout
-reasoning level
-```
+- expected inputs and outputs;
+- class or interface responsibilities;
+- runtime or UI interaction;
+- error behavior;
+- applicable security requirements.
 
-Acceptance:
+**Acceptance**
 
-```text
-request uses configured supported parameters
-```
+- observable behavior;
+- compilation requirements;
+- unit or integration validation;
+- negative/failure-path behavior where relevant;
+- definition of done.
 
----
+**Execution**
 
-## Phase 8 — few-shot
+- corresponding Codex skill name;
+- how to invoke it in the available Codex environment.
 
-Add examples to SKILL.md.
+### Task status
 
-Acceptance:
+Use:
 
-```text
-zero-shot and few-shot runs can be compared
-```
+- `TODO`
+- `READY`
+- `BLOCKED`
+- `IN_PROGRESS`
+- `DONE`
 
----
+Do not mark a task DONE because skeleton classes exist.
 
-## Phase 9 — evaluation
+Mark DONE only when implementation and acceptance evidence support completion.
 
-Implement deterministic checks and stored results.
+Identify blocked dependencies explicitly.
 
-Acceptance:
+## 10. Initial task dependency planning
 
-```text
-run receives an evaluation result
-```
+Use the following as a planning reference, not a fixed task list.
 
----
+Generate tasks based on actual missing implementation and existing code.
 
-## Phase 10 — LLM-as-a-judge
+### Foundation
 
-Implement judge provider/profile and rubric loaded from Markdown.
+- Confirm shared model, agent and runtime contracts.
+- Complete typed configuration and request/response models.
+- Establish service boundaries and dependency direction.
+- Ensure the plugin boots with a minimal IntelliJ Tool Window.
 
-Acceptance:
+### Local model preparation
 
-```text
-target response
-→ deterministic checks
-→ judge
-→ structured JudgeResult
-```
+- Model Registry and local model discovery.
+- Model metadata and path validation.
+- Hardware resource detection.
+- Runtime capability matching.
+- Managed local runtime selection and integration.
+- Runtime lifecycle and model load/unload handling.
+- Actual local model inference.
 
----
+**A verified local inference path is an early architectural milestone.**
 
-## Phase 11 — run history
+Do not defer this until after implementing every other subsystem.
 
-Store reproducible run metadata.
+### Agent execution
 
-Acceptance:
+- Runtime Markdown prompt loading.
+- Agent Registry and model-profile binding.
+- Skill selection and prompt composition.
+- Controlled project grounding.
+- Input guards and secret sanitization.
+- Structured model request and output validation.
+- Controlled tool permission layer.
 
-```text
-previous run can be inspected
-model/profile/prompt/context/evaluation metadata is visible
-```
+### User interaction
 
----
+- Functional AI Workbench Tool Window.
+- Model/profile selection.
+- Agent and skill selection.
+- Context selection and visibility.
+- Prompt submission.
+- Streaming or non-streaming response handling, according to actual runtime support.
+- Error handling and cancellation.
 
-## Phase 12 — training foundation
+### Evaluation
 
-Create:
+- Deterministic checks.
+- Reproducible result metadata.
+- Few-shot demonstration.
+- Judge Agent and evaluation rubric.
+- Structured LLM-as-a-Judge results.
 
-```text
-TrainingRuntime
-TrainingService
-TrainingRecipe
-TrainingRun
-```
+### Completion
 
-Do not fake model training.
+- One complete, real local inference workflow.
+- Explicit demonstration of the required AI concepts.
+- Verification against README.md.
+- Independent review through `skill-ux-review`.
 
-If real training is not implemented yet, clearly mark runtime operations as future work.
+### Optional orchestration
 
----
+Only implement an Advisor/Orchestrator when multiple effective agent workflows require coordination.
 
-## Phase 13 — training MVP
+A single-agent application must not pay unnecessary architectural or runtime overhead for multi-agent orchestration.
 
-When implementation reaches this phase, integrate a real lightweight training path.
+## 11. Working vertical slice
 
-Preferred first target:
+Organize the development plan so it reaches one genuine execution path:
 
-```text
-small open model
-+
-small controlled dataset
-+
-LoRA or QLoRA
-+
-before/after evaluation
-```
+Developer enters prompt → Workbench Tool Window → selected Agent → applicable SKILL.md → controlled Grounding →
+validated Prompt → Model Profile → managed Local Runtime → user-supplied Model → Structured Response → Output
+Validation → Evaluation → displayed Result
 
-The implementation must produce measurable before/after results.
+The initial vertical slice may use a smaller subset provided that it executes real local inference.
 
----
+Expand the workflow incrementally until the README-defined MVP is satisfied.
 
-# 43. Do not fake completeness
+Do not use hard-coded text responses to claim that local inference works.
 
-Never create empty UI tabs and describe them as completed features.
+Mock providers may be used in unit tests, but not as proof of working inference.
 
-Use explicit statuses:
+## 12. AI course requirement mapping
 
-```text
-IMPLEMENTED
-PARTIAL
-PLANNED
-EXPERIMENTAL
-```
+Every course requirement must have:
 
-The graduation project must be technically honest.
+1. A relevant README requirement.
+2. An architectural owner.
+3. A planned implementation task.
+4. A concrete verification or demonstration method.
+5. An actual implementation status.
 
----
+Track at least:
 
-# 44. Do not overbuild the first iteration
+| ID    | Concept               | Required demonstration                                                         |
+|-------|-----------------------|--------------------------------------------------------------------------------|
+| AI-01 | Grounding             | Selected project context reaches a model request under enforced limits.        |
+| AI-02 | System/user roles     | Prompt roles remain correctly separated.                                       |
+| AI-03 | Reasoning             | Supported thinking configuration or concise reasoning summary is demonstrated. |
+| AI-04 | Security              | Input, output, context, secrets and tool access are controlled.                |
+| AI-05 | Few-shot              | Markdown-based examples influence a controlled prompt workflow.                |
+| AI-06 | Structured output     | Model output conforms to a validated typed contract.                           |
+| AI-07 | Generation parameters | Supported parameters reach the local runtime.                                  |
+| AI-08 | Thinking level        | Supported reasoning configuration is applied correctly.                        |
+| AI-09 | Sampling              | Sampling parameters are configurable and respected.                            |
+| AI-10 | LLM-as-a-Judge        | Model-based evaluation produces a structured assessment.                       |
+| AI-11 | Markdown prompts      | Runtime-loaded AGENT.md and SKILL.md affect execution.                         |
+| AI-12 | Integration           | One complete local model workflow executes end to end.                         |
 
-The long-term vision is large.
+Do not require exposure of a model's hidden private chain of thought.
 
-Do not attempt to implement:
+Use reasoning summaries when appropriate.
 
-```text
-all providers
-all training frameworks
-full from-scratch LLM training
-complete MCP ecosystem
-complex autonomous agent
-distributed training
-full model marketplace
-```
+Maintain the requirement mapping in the existing `docs/development/AI-REQUIREMENTS.md`, if available. Otherwise create
+it.
 
-before the basic architecture works.
+Avoid introducing a duplicate requirement matrix.
 
-The first priority is one complete vertical slice.
+## 13. Task generation quality
 
----
+Every task must be:
 
-# 45. First vertical slice
+- actionable;
+- architecture-aligned;
+- sufficiently bounded;
+- dependency-aware;
+- implementation-ready;
+- testable;
+- traceable to README.md.
 
-The first serious milestone must prove:
+Generated Codex task skills must specify the actual expected workflow.
 
-```text
-Tool Window
-    ↓
-Model Profile
-    ↓
-Markdown AGENT
-    ↓
-Markdown SKILL
-    ↓
-Grounding
-    ↓
-Input Security
-    ↓
-Model Provider
-    ↓
-Structured Output
-    ↓
-Output Validation
-    ↓
-Displayed Result
-```
+Each task skill should include:
 
-This vertical slice must compile and run before advanced features are added.
+1. YAML frontmatter with a unique skill name and description.
+2. Applicable README context.
+3. Task ID and objective.
+4. Prerequisite tasks.
+5. Relevant existing files.
+6. Required implementation changes.
+7. Interfaces and data contracts.
+8. Security constraints.
+9. Verification commands.
+10. Acceptance criteria.
+11. Explicit non-goals.
 
----
+Do not specify unsupported commands or invented APIs.
 
-# 46. Definition of done for the initial project creation task
+When exact class paths depend on bootstrap results, inspect and use actual paths.
 
-This skill's initial execution is complete only when:
+Do not prescribe obsolete IntelliJ Platform APIs.
 
-- a valid IntelliJ Platform plugin project exists;
-- Gradle wrapper exists;
-- project builds;
-- `runIde` works;
-- sandbox IntelliJ opens;
-- AI Workbench Tool Window appears;
-- code has separated UI/service/provider/context/prompt/security concerns;
-- `ModelProvider` abstraction exists;
-- `ModelProfile` concept exists;
-- Markdown prompt loading foundation exists;
-- default `AGENT.md` exists;
-- default `SKILL.md` exists;
-- input length guarding exists;
-- a structured response model exists;
-- README exists;
-- architecture documentation exists;
-- AI graduation-requirements mapping exists;
-- security documentation exists;
-- roadmap exists;
-- future training architecture is documented but not falsely presented as complete;
-- code is ready for the next incremental task.
+Use official platform conventions appropriate to the chosen development baseline.
 
----
+## 14. Task implementation safety
 
-# 47. Required final verification
+Generated Codex implementation skills must instruct the coding agent to:
 
-Before declaring the task complete:
+- inspect Git status before editing;
+- read relevant README files;
+- inspect related code;
+- preserve unrelated changes;
+- implement only the selected task;
+- maintain existing architectural boundaries;
+- validate compilation and relevant tests;
+- inspect errors and fix confirmed causes;
+- report actual results.
 
-1. inspect the complete project structure;
-2. run Gradle build;
-3. run tests;
-4. verify plugin descriptor;
-5. verify `runIde`;
-6. verify Tool Window appears;
-7. verify there are no committed secrets;
-8. verify AGENT.md and SKILL.md are runtime-readable;
-9. verify UI does not contain provider-specific architecture assumptions;
-10. verify no existing IntelliJ capability was unnecessarily duplicated;
-11. verify documentation accurately distinguishes implemented and planned features.
+Do not authorize destructive Git operations.
 
-Report actual results.
+Never modify remote `master`.
 
-Do not report commands as successful unless they were actually executed successfully.
+Do not automatically commit or push.
 
----
+Do not hard-code machine-specific model paths, tokens or credentials.
 
-# 48. Git safety
+Do not introduce mandatory cloud connections.
 
-Do not:
+Do not install extra AI plugins as a shortcut.
 
-- force push;
-- reset user work;
-- delete existing branches;
-- modify remote master;
-- merge branches;
-- commit secrets;
-- discard unrelated local changes.
+Do not replace a managed local inference runtime with an external service merely because it is easier to demonstrate.
 
-Unless explicitly requested, leave Git mutations beyond ordinary local project file creation to the user.
+## 15. Planning and implementation separation
 
----
+This skill generates planning and instruction artifacts.
 
-# 49. Implementation decision rule
+It may create or update:
 
-When choosing between:
+- runtime AGENT.md files;
+- runtime SKILL.md files;
+- relevant prompt templates;
+- development task specifications;
+- task-specific Codex skills;
+- course requirement mappings;
+- brief architecture decision records where necessary.
 
-```text
-build a duplicate capability inside the plugin
-```
+It must not:
 
-and:
+- populate all Kotlin skeleton classes with production implementations;
+- change IntelliJ Settings;
+- change Gradle dependencies;
+- implement runtime backends;
+- launch autonomous multi-task coding sessions;
+- claim task completion without code and validation evidence.
 
-```text
-integrate an existing IntelliJ or external runtime capability cleanly
-```
+Those actions belong to subsequent task-specific Codex executions or the existing bootstrap skill.
 
-prefer integration.
+## 16. Incremental maintenance
 
-When choosing between:
+The skill must support repeated execution.
 
-```text
-hard-code one provider
-```
+On subsequent runs:
 
-and:
+1. Inspect the current README hierarchy.
+2. Inspect completed and pending tasks.
+3. Inspect existing agents and skills.
+4. Inspect implementation changes.
+5. Inspect review findings.
+6. Identify missing or outdated planning artifacts.
+7. Update only what is necessary.
 
-```text
-create a small provider abstraction
-```
+Preserve stable task IDs.
 
-prefer the abstraction.
+Preserve valid task-specific implementation instructions.
 
-When choosing between:
+Do not overwrite manually improved instructions with generic templates.
 
-```text
-prompt-only safety
-```
+Do not duplicate already implemented tasks.
 
-and:
+If the README scope changes, update the affected task dependencies and acceptance criteria.
 
-```text
-programmatically enforced safety
-```
+If an implementation satisfies a requirement, verify the evidence before marking the task DONE.
 
-use programmatic enforcement.
+If a task is obsolete, mark it superseded or N/A with a reason rather than silently deleting its history.
 
-When choosing between:
+## 17. Output structure
 
-```text
-free-form internal prose
-```
+Use the repository's existing conventions.
 
-and:
+Expected planning artifacts may include:
 
 ```text
-typed structured communication
+integrated-ai-workbench/
+├── AGENTS.md
+├── README.md
+├── .ai/
+│   ├── agents/
+│   │   ├── default/
+│   │   │   └── AGENT.md
+│   │   └── judge/
+│   │       └── AGENT.md
+│   ├── skills/
+│   │   ├── project-grounding/
+│   │   │   └── SKILL.md
+│   │   └── response-evaluation/
+│   │       └── SKILL.md
+│   ├── prompts/
+│   ├── profiles/
+│   └── policies/
+├── .codex/
+│   └── skills/
+│       ├── skill-readme-settings-and-structure/
+│       │   └── SKILL.md
+│       ├── skill-ux-review/
+│       │   └── SKILL.md
+│       ├── skill-integrated-ai-workbench/
+│       │   └── SKILL.md
+│       ├── skill-iwb-task-model-registry/
+│       │   └── SKILL.md
+│       ├── skill-iwb-task-local-runtime/
+│       │   └── SKILL.md
+│       └── ...
+└── docs/
+    └── development/
+        ├── AI-REQUIREMENTS.md
+        └── tasks/
+            ├── README.md
+            ├── TASK-001-....md
+            ├── TASK-002-....md
+            └── ...
 ```
 
-prefer structured communication.
+This is an illustrative structure, not a requirement to create every example file.
 
-When choosing between:
+Generate only justified agents, skills and tasks.
 
-```text
-large autonomous implementation
-```
+Adapt names and paths to the actual repository.
 
-and:
+Do not create parallel skill directories when a corresponding existing skill already exists elsewhere.
 
-```text
-small verifiable vertical slice
-```
+Keep the task backlog in tracked documentation.
 
-build the verifiable vertical slice first.
+Use `_local/` only for temporary reports and local artifacts.
 
----
+## 18. Validation
 
-# 50. Product vision
+After generating the planning artifacts:
 
-The project must evolve toward this user experience:
+1. Verify all generated files exist.
+2. Verify agent instructions are complete and internally consistent.
+3. Verify task skills have valid metadata and executable instructions.
+4. Verify task IDs are unique.
+5. Verify dependencies refer to existing tasks.
+6. Detect circular task dependencies.
+7. Verify each active README MVP requirement has an implementation task or verified implementation.
+8. Verify each mandatory AI course concept has a plan and acceptance evidence target.
+9. Verify local inference is treated as a Base Plugin responsibility.
+10. Verify no future extension is incorrectly made a mandatory MVP dependency.
+11. Verify existing bootstrap and review skills remain intact.
+12. Check Git diff for unintended changes.
 
-```text
-Developer opens IntelliJ IDEA
-        ↓
-opens project
-        ↓
-opens AI Workbench
-        ↓
-selects:
-    model
-    agent
-    skill
-    context
-    parameters
-        ↓
-runs task
-        ↓
-plugin safely grounds project context
-        ↓
-appropriate local/cloud model is used
-        ↓
-structured output is validated
-        ↓
-IDE-native tools may be invoked through controlled adapters
-        ↓
-result is evaluated
-        ↓
-optional LLM judge scores result
-        ↓
-run is stored reproducibly
-```
+Do not claim application functionality has been validated merely because planning files are valid.
 
-For training:
+## 19. Completion criteria
 
-```text
-Developer selects target model
-        ↓
-selects dataset
-        ↓
-selects AGENT + SKILL
-        ↓
-selects teacher/supervisor model
-        ↓
-runs training workflow
-        ↓
-target model is evaluated
-        ↓
-teacher/judge feedback is collected
-        ↓
-dataset or configuration is improved
-        ↓
-next iteration
-```
+This planning task is complete when:
 
-The long-term result should make IntelliJ IDEA a practical unified workbench for AI-assisted software development and
-lightweight agentic model engineering.
+- runtime agent definitions have meaningful contents;
+- relevant runtime workflow skills have meaningful contents;
+- README requirements are translated into cohesive implementation tasks;
+- tasks have explicit dependency order;
+- each actionable coding task has a corresponding Codex implementation skill;
+- local inference has a technically credible implementation path;
+- no separate AI application is required by the planned Base Plugin;
+- AI course requirements are traceable to tasks and verification methods;
+- future capabilities are correctly deferred;
+- existing project instructions and skills are preserved.
 
----
+## 20. Final response
 
-# 51. Final guiding statement
+Provide a concise Estonian summary:
 
-Build the plugin around this principle:
+- agents created or updated;
+- runtime skills created or updated;
+- number of development tasks;
+- number of Codex task skills;
+- earliest READY task;
+- blocked tasks and their dependencies;
+- major architectural decisions;
+- remaining unknowns.
 
-> One IDE-native workbench should allow a developer to securely and reproducibly configure, ground, run, evaluate and
-> train local or cloud-connected language models without fragmenting the development workflow across multiple unrelated
-> applications.
+Do not reproduce the complete planning documents in the final response.
 
-Every architecture and implementation decision must support that principle. Every configuration made in this plugin
-applicable to new or open project should overwrite any other active setting or configuration either in IntelliJ IDEA
-global settings or project settings by deactivating or changing them in case they are parallel or in conflict with this
-plugin by asking user to agree right after user has marked any change of settings or configurations applicable according
-this rule.
+Do not claim any Kotlin implementation is complete unless verified by actual code and execution evidence.
 
-```
+**Guiding principle:** Transform README-defined intent into actionable, dependency-ordered implementation work. Build
+meaningful agent and skill instructions, prioritize an integrated local inference engine, and progress toward a real,
+testable Base Plugin MVP rather than a large collection of disconnected skeleton classes.

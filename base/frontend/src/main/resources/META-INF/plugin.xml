@@ -1,0 +1,14 @@
+<idea-plugin>
+    <id>integrated-ai-workbench</id>
+    <name>Integrated AI Workbench</name>
+    <vendor url="https://github.com/jaanik007/integrated-ai-workbench">Integrated AI Workbench</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow
+                id="AI Workbench"
+                anchor="right"
+                factoryClass="com.jaanik.integratedaiworkbench.frontend.AiWorkbenchToolWindowFactory"/>
+    </extensions>
+</idea-plugin>

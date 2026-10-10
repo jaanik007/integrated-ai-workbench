@@ -1,273 +1,699 @@
 ---
 name: skill-ux-review
-description: Audits the plugin against the project UX checklist and produces a structured, evidence-based review that can be used directly as remediation planning input.
+description: Performs a read-only, milestone-aware review of the Integrated AI Workbench project against its README.md architecture, development readiness, dependency configuration, implementation coherence, IntelliJ Platform conventions, and AI training requirements. Produces evidence-based findings and prioritized remediation instructions.
 ---
 
-# UX Review
+# Integrated AI Workbench — Project & UX Review
 
-## Purpose
+## 1. Purpose
 
-Review the requested plugin scope against the project UX requirements.
+You are Codex, acting as an independent technical reviewer for the Integrated AI Workbench graduation project.
 
-This skill is audit-only.
+**Repository:** `jaanik007/integrated-ai-workbench`  
+**Project:** Integrated AI Workbench  
+**Current baseline:** Local-first IntelliJ Platform Base Plugin
 
-Do not modify implementation, configuration, documentation, or Git state.
+Your task is to periodically assess whether the actual project implementation is coherent, technically valid, and
+progressing toward the requirements defined in its `README.md` files.
 
-## Context
+This skill is **audit-only**.
 
-Before reviewing:
+Do not modify source code, dependencies, configuration, documentation, Git state, or IntelliJ Settings.
 
-1. Read `AGENTS.md`.
-2. Read the root `README.md`.
-3. Read the applicable subsystem `README.md` files.
-4. Inspect the actual implementation and configuration relevant to the review scope.
-5. Base every result on observable project evidence.
-
-Do not infer that a feature works because it is documented or planned.
-
-## Status values
-
-Use exactly:
-
-- `PASS` — requirement is implemented and supported by evidence.
-- `FAIL` — requirement is missing or violated.
-- `UNKNOWN` — available evidence is insufficient to verify it.
-- `N/A` — requirement does not apply to the reviewed scope.
-
-## Priority values
-
-Use exactly:
-
-- `P0` — release-blocking or serious stability/security issue.
-- `P1` — important UX or platform-compliance issue.
-- `P2` — normal improvement required.
-- `P3` — minor refinement.
-- `-` — no remediation required.
-
-## Review checklist
-
-### Usability
-
-| ID | Requirement |
-|---|---|
-| UX-USE-01 | Core functionality works with sensible defaults after installation. |
-| UX-USE-02 | Common functionality and settings are easy to discover. |
-| UX-USE-03 | Settings are placed in appropriate IntelliJ settings locations. |
-| UX-USE-04 | Actions are placed in appropriate IntelliJ action groups. |
-| UX-USE-05 | Users do not need to understand internal architecture to use the feature. |
-
-### Stability
-
-| ID | Requirement |
-|---|---|
-| UX-STB-01 | Plugin failures do not unnecessarily pollute IDE notifications or messages. |
-| UX-STB-02 | Failed AI operations leave the project and IDE in a valid state. |
-| UX-STB-03 | High-impact generated changes are validated before execution or application. |
-| UX-STB-04 | Critical workflows have appropriate automated validation or tests. |
-| UX-STB-05 | Problems can be diagnosed from available logs without exposing secrets. |
-| UX-STB-06 | A user-accessible issue reporting path exists for released versions. |
-
-### Performance
-
-| ID | Requirement |
-|---|---|
-| UX-PERF-01 | LLM, grounding, evaluation, training, network, and long-running operations do not block the UI thread. |
-| UX-PERF-02 | Project scanning is scoped and performed only when required. |
-| UX-PERF-03 | Features support IntelliJ dumb mode where technically possible. |
-| UX-PERF-04 | Grounding avoids unnecessary full-project analysis. |
-| UX-PERF-05 | Slow providers or runtimes do not freeze the IDE. |
-| UX-PERF-06 | Long-running operations support cancellation or timeout where applicable. |
-
-### Remote Development and Split Mode
-
-| ID | Requirement |
-|---|---|
-| UX-REMOTE-01 | UI and direct user interaction remain on the frontend side where appropriate. |
-| UX-REMOTE-02 | Project files, PSI, indexes, and project-dependent processing remain on the backend side where appropriate. |
-| UX-REMOTE-03 | Only necessary data crosses frontend/backend boundaries. |
-| UX-REMOTE-04 | Runtime location is explicit when local and remote environments may differ. |
-
-### Distribution
-
-| ID | Requirement |
-|---|---|
-| UX-DIST-01 | Large language models are not bundled with the plugin. |
-| UX-DIST-02 | Python, CUDA, model runtimes, or other large external runtimes are not bundled without a justified requirement. |
-| UX-DIST-03 | Existing IntelliJ Platform libraries are reused where appropriate. |
-| UX-DIST-04 | Duplicate or unnecessary dependencies are avoided. |
-| UX-DIST-05 | Icons and other packaged assets are reasonably optimized. |
-| UX-DIST-06 | Large optional components are externalized or loaded only when required. |
-
-### IntelliJ Platform Consistency
-
-| ID | Requirement |
-|---|---|
-| UX-IDE-01 | Existing IntelliJ functionality is reused instead of unnecessarily reimplemented. |
-| UX-IDE-02 | Tool Windows follow normal IntelliJ behaviour. |
-| UX-IDE-03 | Settings follow normal IntelliJ behaviour. |
-| UX-IDE-04 | Actions follow normal IntelliJ behaviour. |
-| UX-IDE-05 | Notifications and dialogs follow normal IntelliJ behaviour. |
-| UX-IDE-06 | Stable public IntelliJ Platform APIs are preferred. |
-| UX-IDE-07 | Standard keyboard, focus, navigation, cancellation, and interaction patterns are preserved. |
-
-### Visual Consistency
-
-| ID | Requirement |
-|---|---|
-| UX-VIS-01 | Standard IntelliJ UI components are preferred. |
-| UX-VIS-02 | Custom UI is used only when standard components are insufficient. |
-| UX-VIS-03 | Icons follow JetBrains platform conventions. |
-| UX-VIS-04 | Light theme is supported correctly. |
-| UX-VIS-05 | Dark theme is supported correctly. |
-| UX-VIS-06 | Layout and interaction patterns are visually consistent with the IDE. |
-
-### UI Text
-
-| ID | Requirement |
-|---|---|
-| UX-TXT-01 | Labels, buttons, and field names are concise and unambiguous. |
-| UX-TXT-02 | Error messages explain what happened. |
-| UX-TXT-03 | Error messages provide an actionable next step where possible. |
-| UX-TXT-04 | Internal implementation terminology is not unnecessarily exposed to users. |
-| UX-TXT-05 | User-facing English text is clear and consistent. |
-| UX-TXT-06 | UI text is structured so future localization remains possible. |
-
-### Marketplace Presentation
-
-| ID | Requirement |
-|---|---|
-| UX-MKT-01 | Plugin description clearly explains its purpose. |
-| UX-MKT-02 | Screenshots represent actual implemented functionality. |
-| UX-MKT-03 | Implemented, partial, experimental, and planned functionality are clearly distinguished. |
-| UX-MKT-04 | Installation and initial setup instructions are clear. |
-| UX-MKT-05 | Provider and external runtime requirements are clearly documented. |
-
-## Review method
-
-For every checklist item:
-
-1. inspect relevant source code, resources, configuration, tests, and documentation;
-2. assign one status;
-3. cite concrete project evidence using file paths, classes, methods, configuration keys, or UI components;
-4. for `FAIL`, describe the smallest required remediation;
-5. for `UNKNOWN`, state exactly what must be verified;
-6. assign remediation priority.
-
-Do not mark an item `PASS` based only on planned documentation.
-
-Do not treat an unimplemented future feature as a failure unless it belongs to the reviewed scope or current release target.
-
-## Output
-
-Return exactly this structure.
-
-# UX Review Result
-
-**Scope:** `<reviewed scope>`  
-**Date:** `<date if available>`
-
-## Summary
-
-| Status | Count |
-|---|---:|
-| PASS | 0 |
-| FAIL | 0 |
-| UNKNOWN | 0 |
-| N/A | 0 |
-
-## Checklist
-
-| ID | Requirement | Status | Evidence | Required action | Priority |
-|---|---|---|---|---|---|
-| UX-USE-01 | Core functionality works with sensible defaults after installation. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-USE-02 | Common functionality and settings are easy to discover. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-USE-03 | Settings are placed in appropriate IntelliJ settings locations. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-USE-04 | Actions are placed in appropriate IntelliJ action groups. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-USE-05 | Users do not need to understand internal architecture to use the feature. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-STB-01 | Plugin failures do not unnecessarily pollute IDE notifications or messages. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-STB-02 | Failed AI operations leave the project and IDE in a valid state. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-STB-03 | High-impact generated changes are validated before execution or application. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-STB-04 | Critical workflows have appropriate automated validation or tests. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-STB-05 | Problems can be diagnosed from available logs without exposing secrets. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-STB-06 | A user-accessible issue reporting path exists for released versions. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-PERF-01 | Long-running operations do not block the UI thread. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-PERF-02 | Project scanning is scoped and performed only when required. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-PERF-03 | Features support IntelliJ dumb mode where technically possible. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-PERF-04 | Grounding avoids unnecessary full-project analysis. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-PERF-05 | Slow providers or runtimes do not freeze the IDE. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-PERF-06 | Long-running operations support cancellation or timeout where applicable. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-REMOTE-01 | UI and direct user interaction remain on the frontend side where appropriate. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-REMOTE-02 | Project-dependent processing remains on the backend side where appropriate. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-REMOTE-03 | Only necessary data crosses frontend/backend boundaries. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-REMOTE-04 | Runtime location is explicit when local and remote environments may differ. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-DIST-01 | Large language models are not bundled with the plugin. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-DIST-02 | Large external runtimes are not bundled without justification. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-DIST-03 | Existing IntelliJ Platform libraries are reused where appropriate. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-DIST-04 | Duplicate or unnecessary dependencies are avoided. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-DIST-05 | Packaged assets are reasonably optimized. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-DIST-06 | Large optional components are externalized or loaded only when required. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-IDE-01 | Existing IntelliJ functionality is reused instead of unnecessarily reimplemented. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-IDE-02 | Tool Windows follow normal IntelliJ behaviour. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-IDE-03 | Settings follow normal IntelliJ behaviour. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-IDE-04 | Actions follow normal IntelliJ behaviour. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-IDE-05 | Notifications and dialogs follow normal IntelliJ behaviour. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-IDE-06 | Stable public IntelliJ Platform APIs are preferred. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-IDE-07 | Standard keyboard, focus, navigation, cancellation, and interaction patterns are preserved. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-VIS-01 | Standard IntelliJ UI components are preferred. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-VIS-02 | Custom UI is used only when standard components are insufficient. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-VIS-03 | Icons follow JetBrains platform conventions. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-VIS-04 | Light theme is supported correctly. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-VIS-05 | Dark theme is supported correctly. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-VIS-06 | Layout and interaction patterns are visually consistent with the IDE. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-TXT-01 | Labels, buttons, and field names are concise and unambiguous. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-TXT-02 | Error messages explain what happened. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-TXT-03 | Error messages provide an actionable next step where possible. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-TXT-04 | Internal implementation terminology is not unnecessarily exposed to users. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-TXT-05 | User-facing English text is clear and consistent. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-TXT-06 | UI text allows future localization. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-MKT-01 | Plugin description clearly explains its purpose. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-MKT-02 | Screenshots represent actual implemented functionality. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-MKT-03 | Implemented, partial, experimental, and planned functionality are clearly distinguished. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-MKT-04 | Installation and initial setup instructions are clear. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-| UX-MKT-05 | Provider and external runtime requirements are clearly documented. | PASS / FAIL / UNKNOWN / N/A | `<evidence>` | `<action or ->` | `<priority>` |
-
-## Remediation Input
-
-Include only `FAIL` and actionable `UNKNOWN` items.
-
-Order by:
-
-`P0 → P1 → P2 → P3`
-
-Use:
-
-| ID | Priority | Problem | Required change | Evidence / verification target |
-|---|---|---|---|---|
-| `<ID>` | `<P0-P3>` | `<confirmed deficiency>` | `<smallest correct change>` | `<file, component, behaviour, or test>` |
-
-If there are no remediation items, write:
-
-`No UX remediation items identified in the reviewed scope.`
-
-## Completion rule
-
-The review is complete only when every applicable checklist item has:
-
-- one status;
-- concrete evidence or a reason why evidence is unavailable;
-- a remediation action for every `FAIL`;
-- a verification target for every actionable `UNKNOWN`.
-
-Never convert `UNKNOWN` to `PASS` based on assumption.
-
-## Output file
-
-Write the completed review to:
+The only permitted project file modification is creating or overwriting:
 
 `_local/reviews/ux-review.md`
 
-Create the directory if it does not exist.
+The review should produce concrete, prioritized remediation input suitable for a subsequent Codex implementation task.
 
-Overwrite the previous review on every complete run.
+Do not implement the remediation yourself.
 
-Do not modify any other project files.
+## 2. Authoritative context
+
+Before reviewing:
+
+1. Read root `AGENTS.md`.
+2. Read root `README.md`.
+3. Discover relevant nested `README.md` files.
+4. Read the README files applicable to the reviewed subsystem.
+5. Inspect the actual directory tree, Gradle configuration, source code, resources, tests and relevant IDE
+   configuration.
+6. Compare documented intent against observable implementation.
+
+Use this hierarchy:
+
+**User instructions → AGENTS.md → root README.md → subsystem README.md → actual implementation.**
+
+README files define the intended architecture and project requirements.
+
+Actual source files, configuration and executed validation results establish what is implemented.
+
+Do not assume a documented component exists or works.
+
+Do not introduce external requirements that are not applicable to the project.
+
+## 3. Review scope and milestones
+
+Integrated AI Workbench is an educational and experimental development project.
+
+It is not being prepared for JetBrains Marketplace publication.
+
+Do not evaluate:
+
+- Marketplace listing readiness;
+- Marketplace screenshots or marketing descriptions;
+- commercial release requirements;
+- publication approval;
+- unnecessary distribution assets;
+- public support infrastructure;
+- full future-product completeness.
+
+GitHub source distribution and optional installable plugin archives remain valid development mechanisms, but release
+packaging is not a current review requirement unless explicitly included in the active milestone.
+
+### Milestone A — Project bootstrap
+
+Current review priority:
+
+- correct README and AGENTS hierarchy;
+- compatible IntelliJ development environment;
+- valid Gradle configuration;
+- correctly resolved dependencies;
+- correct JDK/Kotlin/IntelliJ Platform compatibility;
+- coherent project structure;
+- correctly located Kotlin source files and resources;
+- valid `plugin.xml`;
+- compilable skeleton files;
+- correct package and class references;
+- clear frontend/shared/backend responsibilities;
+- groundwork for AI concepts required by the course;
+- no unnecessary dependencies or duplicate IDE features.
+
+Do not demand fully functional AI inference, training, orchestration or evaluation at this milestone.
+
+### Milestone B — Base Plugin MVP
+
+When the project reaches implementation:
+
+- a working AI Workbench Tool Window;
+- at least one real local inference workflow;
+- user-selected model and runtime integration;
+- model profiles;
+- agent and skill instructions;
+- controlled project grounding;
+- prompt composition;
+- input/output security;
+- structured responses;
+- configurable model parameters;
+- deterministic evaluation;
+- LLM-as-a-Judge;
+- clear presentation of results.
+
+The Base Plugin must remain useful without cloud providers or another AI plugin.
+
+### Milestone C — Future extensions
+
+Treat the following as future capabilities unless explicitly included in the current implementation milestone:
+
+- remote/cloud provider extensions;
+- advanced MCP integrations;
+- advanced RAG;
+- model fine-tuning;
+- LoRA/QLoRA;
+- dataset management;
+- supervised agentic training;
+- distributed training.
+
+Do not report them as defects merely because they are not yet implemented.
+
+### Milestone selection
+
+Determine the review milestone from:
+
+1. explicit user instructions;
+2. current README and roadmap;
+3. actual project state.
+
+If no explicit milestone is provided, review current implemented work and the nearest active milestone.
+
+State any milestone inference in the report.
+
+Do not silently assume that the complete long-term product must already exist.
+
+## 4. Review status and priority
+
+Use exactly these result statuses:
+
+| Status    | Meaning                                                                          |
+|-----------|----------------------------------------------------------------------------------|
+| `PASS`    | Applicable requirement is satisfied by verifiable evidence.                      |
+| `FAIL`    | Requirement is due at the current milestone and is missing, invalid or violated. |
+| `UNKNOWN` | Requirement is applicable but cannot be verified with available evidence.        |
+| `N/A`     | Requirement does not apply to the current milestone or reviewed subsystem.       |
+
+A planned feature not yet due is `N/A`, not `FAIL`.
+
+A missing source file required by the current milestone is `FAIL`, not `UNKNOWN`.
+
+A build that has not been run is `UNKNOWN`, not `PASS`.
+
+Use these remediation priorities:
+
+| Priority | Meaning                                                                      |
+|----------|------------------------------------------------------------------------------|
+| `P0`     | Blocks current milestone: build, startup, critical architecture or security. |
+| `P1`     | Violates an important current README or course requirement.                  |
+| `P2`     | Correctness, maintainability, integration or usability improvement.          |
+| `P3`     | Minor refinement or cleanup.                                                 |
+| `-`      | No remediation required.                                                     |
+
+Do not assign release-blocking severity solely because a future feature is absent.
+
+## 5. Review area — Repository and project coherence
+
+Verify:
+
+**PRJ-01 — README alignment**
+
+Actual project purpose, technology and architecture agree with the applicable README files.
+
+**PRJ-02 — Instruction hierarchy**
+
+`AGENTS.md` and relevant README files form a consistent, discoverable instruction hierarchy.
+
+**PRJ-03 — Scope discipline**
+
+Implemented components belong to the current Base Plugin or explicitly planned extensions.
+
+**PRJ-04 — Architectural boundaries**
+
+Frontend, shared and backend responsibilities are separated correctly.
+
+Physical Gradle modules are not mandatory where source packages provide sufficient separation.
+
+**PRJ-05 — Naming coherence**
+
+Plugin ID, package names, class names, Gradle project names and resource references are consistent.
+
+**PRJ-06 — Avoiding duplicate functionality**
+
+The project reuses IntelliJ Platform capabilities instead of unnecessarily recreating the editor, terminal, Git,
+debugger, project navigation or build systems.
+
+**PRJ-07 — Implementation status accuracy**
+
+Documentation distinguishes actual implementation from planned functionality.
+
+**PRJ-08 — Local-first architecture**
+
+The Base Plugin does not require mandatory cloud services, proprietary model providers or another AI plugin.
+
+## 6. Review area — Development environment and dependencies
+
+Verify:
+
+**ENV-01 — Java toolchain**
+
+JDK 21 or a justified compatible toolchain is configured correctly.
+
+**ENV-02 — Gradle**
+
+Gradle Wrapper, settings, build scripts and repositories are valid.
+
+**ENV-03 — IntelliJ Platform compatibility**
+
+IntelliJ Platform, Gradle Plugin, Kotlin and Java versions are mutually compatible.
+
+**ENV-04 — Dependency resolution**
+
+Required dependencies resolve successfully without unnecessary conflicts.
+
+**ENV-05 — Dependency scope**
+
+No unnecessary cloud SDKs, training frameworks, model binaries or unrelated frameworks are introduced into Base Plugin
+bootstrap.
+
+**ENV-06 — IntelliJ Settings**
+
+Accessible project settings are compatible with the Gradle/JDK/Kotlin configuration.
+
+Distinguish global settings from project settings.
+
+If current IDE settings are inaccessible, record `UNKNOWN`; do not infer values from documentation.
+
+**ENV-07 — Reproducible setup**
+
+The project can be initialized using documented requirements and Gradle Wrapper without undocumented machine-specific
+assumptions.
+
+**ENV-08 — Build readiness**
+
+Actual compilation and build validation succeed where executed.
+
+Do not confuse successful dependency resolution with successful compilation.
+
+## 7. Review area — File tree and skeleton implementation
+
+Compare the actual structure with the current README.
+
+Verify:
+
+**STR-01 — Repository structure**
+
+Required directories exist in their appropriate locations.
+
+**STR-02 — Source roots**
+
+Kotlin and resource files are located in valid Gradle source roots.
+
+**STR-03 — Package consistency**
+
+Source file locations, package declarations and imports agree.
+
+**STR-04 — Plugin descriptor**
+
+`META-INF/plugin.xml` is valid and references existing implementation classes.
+
+**STR-05 — Tool Window foundation**
+
+The Tool Window factory and minimal UI are correctly registered for the applicable milestone.
+
+**STR-06 — Core architecture contracts**
+
+Required interfaces and typed models exist for the planned initial architecture.
+
+**STR-07 — Runtime instruction structure**
+
+`.ai/agents`, `.ai/skills`, prompts, profiles and policies follow README conventions where applicable.
+
+**STR-08 — Skeleton correctness**
+
+Skeleton classes compile and do not introduce circular dependencies, broken references or misleading fake
+implementations.
+
+**STR-09 — Local/generated state**
+
+`.idea`, `.gradle`, build output, model binaries, `.aim`, `_local` and secrets are handled consistently with
+`.gitignore`.
+
+**STR-10 — No premature architecture**
+
+Do not require additional Gradle modules, elaborate abstractions or future subsystem implementations merely for
+structural appearance.
+
+## 8. Review area — Course AI concepts
+
+This section is mandatory for every review.
+
+The project must eventually demonstrate the AI concepts taught in the training program.
+
+For each concept:
+
+1. Identify the intended architecture or component.
+2. Determine its current implementation state.
+3. Determine whether implementation is required at the active milestone.
+4. Inspect actual evidence.
+5. Record missing prerequisites or implementation gaps.
+6. Propose the smallest appropriate next step.
+
+### AI-01 — Grounding
+
+Controlled project context selection using relevant files, active editor, selected code or other explicitly allowed
+sources.
+
+Expected architecture: `ContextService` or equivalent.
+
+Verify scoped access, context limits and avoidance of unnecessary whole-project ingestion.
+
+### AI-02 — System and user prompts
+
+System instructions, agent instructions, task/skill instructions, grounding context and user input remain logically
+distinct.
+
+Expected architecture: `PromptComposer` and typed request models.
+
+Preserve native model roles when supported.
+
+### AI-03 — Reasoning / Chain-of-Thought concept
+
+Support provider/runtime reasoning configuration when available.
+
+Do not require hidden private chain-of-thought disclosure.
+
+A concise reasoning summary may be used instead.
+
+### AI-04 — Basic security
+
+Required concepts:
+
+- input sanitization;
+- output validation/sanitization;
+- maximum input length;
+- maximum context size;
+- secret filtering;
+- allowed file paths;
+- tool permissions;
+- execution timeouts;
+- local/remote data restrictions.
+
+Security must be programmatically enforced where relevant, not implemented solely through prompt instructions.
+
+### AI-05 — One-shot / few-shot prompting
+
+Support task examples in `SKILL.md` or equivalent prompt resources.
+
+At MVP stage, verify that examples are actually loaded and used.
+
+The final demonstration should allow meaningful comparison with a zero-shot workflow.
+
+### AI-06 — Structured output
+
+Typed responses and validated machine-readable results.
+
+Expected architecture: `ModelResponse`, structured DTOs and `StructuredResponseValidator` or equivalents.
+
+### AI-07 — Model generation parameters
+
+Support applicable parameters such as:
+
+- `temperature`;
+- `top_p`;
+- `max_tokens`;
+- `timeout`;
+- optionally `seed`.
+
+Provider-specific unsupported parameters must be handled correctly.
+
+### AI-08 — Thinking level
+
+Model profiles must represent supported reasoning/thinking settings.
+
+Do not require a runtime to accept parameters it does not support.
+
+### AI-09 — Sampling configuration
+
+Verify that supported sampling settings are not merely displayed but reach the actual model request.
+
+### AI-10 — LLM-as-a-Judge
+
+Review judge abstraction, evaluation rubric, model assignment and structured results.
+
+At MVP stage, verify working model-based evaluation rather than a placeholder class.
+
+Deterministic failures must not be overruled by the judge.
+
+### AI-11 — Markdown prompt files
+
+Verify that AGENT, SKILL and prompt Markdown resources follow their intended separate responsibilities.
+
+At MVP stage, verify runtime loading without recompilation.
+
+### AI-12 — End-to-end demonstration
+
+At MVP stage, verify that at least one real workflow combines:
+
+User task → Agent → Skill → Grounding → Security → Local Runtime → Model → Structured Output → Validation → Evaluation →
+Result.
+
+Do not require this workflow to function during project bootstrap.
+
+### Course requirements tracking
+
+Include a compact course-concept matrix in the report:
+
+| Concept | Current implementation | Evidence | Gap / next action |
+|---------|------------------------|----------|-------------------|
+
+Use `IMPLEMENTED`, `PARTIAL`, `PLANNED`, `EXPERIMENTAL` to describe implementation maturity.
+
+These maturity labels do not replace the formal review statuses.
+
+For bootstrap, primarily evaluate whether the necessary architecture is correctly prepared.
+
+For MVP, evaluate actual execution and demonstration evidence.
+
+## 9. Review area — IntelliJ UX and platform quality
+
+Review only existing or current-milestone UI functionality.
+
+**UX-01 — Native integration**
+
+Use conventional IntelliJ Tool Windows, actions, components and settings.
+
+**UX-02 — Discoverability**
+
+Existing user-facing functionality is accessible without navigating internal architecture.
+
+**UX-03 — Visual consistency**
+
+Implemented UI follows relevant IntelliJ typography, layout, spacing and component conventions.
+
+**UX-04 — Theme compatibility**
+
+Existing custom UI behaves correctly in supported light and dark themes.
+
+Do not fail this criterion solely because no custom UI exists yet.
+
+**UX-05 — UI responsiveness**
+
+Long-running operations must not block the IntelliJ UI thread.
+
+**UX-06 — Errors and feedback**
+
+Implemented operations report failures clearly and do not misrepresent their completion state.
+
+**UX-07 — Interaction consistency**
+
+Applicable focus, keyboard, navigation and cancellation patterns behave conventionally.
+
+**UX-08 — Remote Development architecture**
+
+Assess frontend/backend separation and runtime location only to the extent implemented or required by the current
+milestone.
+
+Do not require full Split Mode functionality merely because the README reserves architectural boundaries for it.
+
+**UX-09 — Model and runtime transparency**
+
+When corresponding UI exists, the developer can identify the selected model, runtime, agent, skill and execution
+context.
+
+Do not review decorative future UI controls as completed functionality.
+
+## 10. Review area — Security and reproducibility
+
+Verify applicable safeguards:
+
+**SEC-01 — Credentials**
+
+Secrets are not hard-coded or committed.
+
+**SEC-02 — PasswordSafe**
+
+Persistent sensitive credentials use appropriate secure storage where implemented.
+
+**SEC-03 — Tool permissions**
+
+Potentially high-impact tool operations are explicitly authorized and controlled when tool execution exists.
+
+**SEC-04 — Grounding boundaries**
+
+Model context selection respects allowed paths, limits and confidentiality policy where implemented.
+
+**SEC-05 — Safe failure**
+
+Existing failed operations do not leave project files or IDE state unexpectedly modified.
+
+**SEC-06 — Reproducibility**
+
+Implemented workflows record sufficient configuration and execution metadata for diagnosis and meaningful comparison.
+
+Do not require the complete future run-history subsystem during bootstrap.
+
+## 11. Review procedure
+
+Execute the following sequence.
+
+### Step 1 — Establish scope
+
+Identify the current milestone and affected subsystems.
+
+Read the relevant README context.
+
+Determine which review criteria are currently applicable.
+
+### Step 2 — Inspect actual implementation
+
+Inspect:
+
+- project directory structure;
+- Gradle configuration;
+- source roots;
+- Kotlin source;
+- plugin descriptor;
+- runtime instruction files;
+- tests;
+- documentation;
+- relevant IDE settings where accessible.
+
+Use actual repository state rather than speculative expectations.
+
+### Step 3 — Validate
+
+Prefer existing evidence and safe read-only inspection first.
+
+When permitted and feasible, execute non-destructive build and validation commands.
+
+Gradle build/test commands may create ordinary generated build outputs and caches, but must not intentionally modify
+source files, tracked configuration or dependencies.
+
+Do not install dependencies, update wrapper versions or apply automatic fixes during the review.
+
+If an execution check is unavailable, record `UNKNOWN`.
+
+### Step 4 — Classify
+
+For each applicable criterion:
+
+- assign status;
+- identify concrete evidence;
+- record file path, class, method or configuration key;
+- describe the precise deficiency if any;
+- assign priority.
+
+Use `N/A` for deferred requirements outside the current milestone.
+
+### Step 5 — Check architecture coherence
+
+Look for:
+
+- contradictions between README and implementation;
+- missing required files;
+- wrong source locations;
+- duplicate abstractions;
+- unnecessary dependencies;
+- incomplete integration boundaries;
+- fake functional placeholders;
+- mismatched class or resource references;
+- school concepts lacking an architectural destination;
+- security restrictions that exist only in natural-language instructions.
+
+Focus on meaningful deficiencies rather than stylistic preferences.
+
+### Step 6 — Prepare remediation
+
+Recommend the smallest correct change.
+
+Do not propose unrelated refactoring.
+
+Separate immediate blockers from later architectural work.
+
+Order recommendations by `P0 → P1 → P2 → P3`.
+
+Avoid repeating the same underlying problem under multiple checklist IDs.
+
+## 12. Report format
+
+Write the review to:
+
+`_local/reviews/ux-review.md`
+
+Create the parent directory if necessary.
+
+Overwrite the previous review after completing a new audit.
+
+The report must contain:
+
+### A. Review context
+
+- project;
+- review date;
+- current milestone;
+- inspected areas;
+- verification limitations.
+
+### B. Summary
+
+| Status  | Count |
+|---------|------:|
+| PASS    |   ... |
+| FAIL    |   ... |
+| UNKNOWN |   ... |
+| N/A     |   ... |
+
+Add a concise conclusion about current milestone readiness.
+
+### C. Critical findings
+
+Describe only substantive findings, ordered by priority.
+
+### D. Checklist results
+
+| ID | Status | Evidence | Required action | Priority |
+|----|--------|----------|-----------------|----------|
+
+Include applicable failures, actionable unknowns and meaningful passes.
+
+Summarize remaining passing or non-applicable criteria without redundant rows where that improves readability.
+
+### E. Course AI concepts
+
+Include the AI-01 through AI-12 requirements tracking matrix.
+
+Show actual implementation maturity and the next relevant step.
+
+### F. Remediation input
+
+| Priority | File / component | Required change | Verification target |
+|----------|------------------|-----------------|---------------------|
+
+Include only actionable findings.
+
+The remediation section should be directly usable as input for a future Codex implementation task.
+
+### G. Final assessment
+
+Provide:
+
+- current milestone readiness;
+- principal blockers;
+- architectural consistency assessment;
+- recommended next implementation priority.
+
+Keep the report compact, factual and evidence-based.
+
+## 13. Review quality rules
+
+- Do not mark planned documentation as functioning implementation.
+- Do not claim success for commands not actually executed.
+- Do not confuse missing future functionality with current defects.
+- Do not invent missing classes, tests, settings or dependency versions.
+- Do not insist on unnecessary Gradle modules.
+- Do not favor more files over better architecture.
+- Do not enforce Marketplace publication standards.
+- Do not demand cloud services for a local-first Base Plugin.
+- Do not require model training during Base Plugin bootstrap.
+- Do not interpret hidden chain-of-thought access as a course requirement.
+- Do not approve insecure implementations merely because the intended behavior is documented.
+- Do not use subjective UX preferences as substitutes for functional correctness.
+- Do not modify implementation while conducting the review.
+
+## 14. Completion rule
+
+The review is complete when:
+
+1. The active development milestone is identified.
+2. Applicable README requirements are evaluated.
+3. Dependency and project-structure coherence is assessed.
+4. Actual implementation evidence is recorded.
+5. All required course AI concepts are tracked.
+6. Current blockers and actionable unknowns are identified.
+7. Remediation actions are prioritized.
+8. `_local/reviews/ux-review.md` is written.
+9. No other project files are modified.
+
+Finish with a short Estonian summary containing the principal findings and report location.
+
+**Guiding principle:** Evaluate the project against its actual README-defined architecture and current development
+milestone, preserving the distinction between correctly prepared foundations, working implementations and intentionally
+deferred functionality.
