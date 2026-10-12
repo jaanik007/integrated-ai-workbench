@@ -86,7 +86,7 @@ Current review priority:
 - compilable skeleton files;
 - correct package and class references;
 - clear frontend/shared/backend responsibilities;
-- groundwork for AI concepts required by the course;
+- groundwork for AI development core concepts;
 - no unnecessary dependencies or duplicate IDE features.
 
 Do not demand fully functional AI inference, training, orchestration or evaluation at this milestone.
@@ -159,13 +159,13 @@ A build that has not been run is `UNKNOWN`, not `PASS`.
 
 Use these remediation priorities:
 
-| Priority | Meaning                                                                      |
-|----------|------------------------------------------------------------------------------|
-| `P0`     | Blocks current milestone: build, startup, critical architecture or security. |
-| `P1`     | Violates an important current README or course requirement.                  |
-| `P2`     | Correctness, maintainability, integration or usability improvement.          |
-| `P3`     | Minor refinement or cleanup.                                                 |
-| `-`      | No remediation required.                                                     |
+| Priority | Meaning                                                                                                |
+|----------|--------------------------------------------------------------------------------------------------------|
+| `P0`     | Blocks current milestone: build, startup, critical architecture or security.                           |
+| `P1`     | Violates an important requirement defined in the current project README or architecture documentation. |
+| `P2`     | Correctness, maintainability, integration or usability improvement.                                    |
+| `P3`     | Minor refinement or cleanup.                                                                           |
+| `-`      | No remediation required.                                                                               |
 
 Do not assign release-blocking severity solely because a future feature is absent.
 
@@ -301,11 +301,12 @@ implementations.
 Do not require additional Gradle modules, elaborate abstractions or future subsystem implementations merely for
 structural appearance.
 
-## 8. Review area — Course AI concepts
+## 8. Review area — Core AI concepts
 
 This section is mandatory for every review.
 
-The project must eventually demonstrate the AI concepts taught in the training program.
+The project must implement and verify the required AI capabilities as integrated, fully functional features of
+Integrated AI Workbench.
 
 For each concept:
 
@@ -364,7 +365,7 @@ Support task examples in `SKILL.md` or equivalent prompt resources.
 
 At MVP stage, verify that examples are actually loaded and used.
 
-The final demonstration should allow meaningful comparison with a zero-shot workflow.
+The final audit result should allow meaningful comparison with a zero-shot workflow.
 
 ### AI-06 — Structured output
 
@@ -408,7 +409,7 @@ Verify that AGENT, SKILL and prompt Markdown resources follow their intended sep
 
 At MVP stage, verify runtime loading without recompilation.
 
-### AI-12 — End-to-end demonstration
+### AI-12 — End-to-end workflow verification
 
 At MVP stage, verify that at least one real workflow combines:
 
@@ -417,9 +418,9 @@ Result.
 
 Do not require this workflow to function during project bootstrap.
 
-### Course requirements tracking
+### Plugin fundamental requirements tracking
 
-Include a compact course-concept matrix in the report:
+Include a compact core-concept matrix in the report:
 
 | Concept | Current implementation | Evidence | Gap / next action |
 |---------|------------------------|----------|-------------------|
@@ -430,7 +431,8 @@ These maturity labels do not replace the formal review statuses.
 
 For bootstrap, primarily evaluate whether the necessary architecture is correctly prepared.
 
-For MVP, evaluate actual execution and demonstration evidence.
+For the MVP, verify actual functionality through integration tests, end-to-end workflow validation, and documented
+acceptance criteria.
 
 ## 9. Review area — IntelliJ UX and platform quality
 
@@ -636,7 +638,7 @@ Include applicable failures, actionable unknowns and meaningful passes.
 
 Summarize remaining passing or non-applicable criteria without redundant rows where that improves readability.
 
-### E. Course AI concepts
+### E. Core AI concepts
 
 Include the AI-01 through AI-12 requirements tracking matrix.
 
@@ -673,7 +675,8 @@ Keep the report compact, factual and evidence-based.
 - Do not enforce Marketplace publication standards.
 - Do not demand cloud services for a local-first Base Plugin.
 - Do not require model training during Base Plugin bootstrap.
-- Do not interpret hidden chain-of-thought access as a course requirement.
+- Do not require access to a model's hidden chain-of-thought. Reasoning capabilities must be configured and evaluated
+  through supported model parameters and observable outputs.
 - Do not approve insecure implementations merely because the intended behavior is documented.
 - Do not use subjective UX preferences as substitutes for functional correctness.
 - Do not modify implementation while conducting the review.
@@ -686,7 +689,7 @@ The review is complete when:
 2. Applicable README requirements are evaluated.
 3. Dependency and project-structure coherence is assessed.
 4. Actual implementation evidence is recorded.
-5. All required course AI concepts are tracked.
+5. All required core AI concepts are tracked.
 6. Current blockers and actionable unknowns are identified.
 7. Remediation actions are prioritized.
 8. `_local/reviews/ux-review.md` is written.

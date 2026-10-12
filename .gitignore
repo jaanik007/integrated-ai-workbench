@@ -40,3 +40,5 @@ runtimes/
 # Operating system files
 .DS_Store
 Thumbs.db
+
+/.gradle-user-home/

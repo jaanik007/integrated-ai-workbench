@@ -15,7 +15,7 @@ automated development tool used with this repository.
 
 - Respond to the user in Estonian by default unless another language is requested.
 - Keep technical terminology precise and concise.
-- Code, identifiers, configuration keys, API names, file names, commands, and established technical terms may remain in
+- Code, identifiers, configuration keys, API names, file names, commands, and established technical terms shall remain in
   English.
 - When guiding the user through interactive setup or configuration, prefer one actionable step at a time and wait for
   confirmation before continuing when appropriate.

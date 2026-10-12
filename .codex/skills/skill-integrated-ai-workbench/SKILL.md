@@ -1,6 +1,6 @@
 ---
 name: skill-integrated-ai-workbench
-description: Generates and maintains README-aligned runtime AGENT.md and SKILL.md instructions, a dependency-ordered implementation backlog, and executable Codex task skills for the Integrated AI Workbench Base Plugin. Prioritizes native managed local LLM inference, complete MVP workflows, security, and demonstrable AI course requirements.
+description: Maintain README-aligned runtime AGENT.md and SKILL.md instructions and a dependency-ordered implementation backlog for the Integrated AI Workbench Base Plugin. Link TASK specifications to the shared skill-iwb-implement workflow; do not implement tasks or generate individual implementation skills.
 ---
 
 # Integrated AI Workbench — Agent & Implementation Planner
@@ -16,8 +16,8 @@ Your responsibility is to transform the documented product architecture and exis
 1. Complete, meaningful runtime `AGENT.md` files.
 2. Complete, executable runtime `SKILL.md` files.
 3. A dependency-ordered implementation backlog.
-4. One task-specific Codex implementation skill for each appropriate development task.
-5. Explicit acceptance criteria connecting implementation to the project's AI course requirements.
+4. Task references to the single reusable Codex implementation skill, `skill-iwb-implement`.
+5. Explicit acceptance criteria connecting implementation to the project's AI core concepts.
 
 This skill prepares the project for incremental coding.
 
@@ -74,7 +74,7 @@ Responsible for:
 - dependency and structure coherence;
 - IntelliJ UX;
 - security requirements;
-- course-concept coverage;
+- core-concept coverage;
 - prioritized remediation findings.
 
 Use its existing report as optional planning input.
@@ -89,7 +89,7 @@ This skill is responsible for:
 - generating runtime workflow skills;
 - mapping README requirements to actual implementation tasks;
 - sequencing tasks according to dependencies;
-- generating implementation-ready Codex skills;
+- maintaining task references to the shared implementation workflow;
 - defining acceptance and verification criteria.
 
 Do not recreate the two existing skills under new names.
@@ -334,7 +334,8 @@ agent workflow.
 - failure handling;
 - concrete examples where useful.
 
-At least one applicable runtime skill must demonstrate one-shot or few-shot prompting.
+At least one applicable runtime skill must implement one-shot or few-shot prompting, with its functionality verified
+through automated tests.
 
 Examples must be relevant to the project and must not contain secrets.
 
@@ -346,21 +347,26 @@ Distinguish:
 
 Do not claim these three states are equivalent.
 
-## 8. Codex task skills — separate responsibility
+## 8. Shared Codex implementation workflow — separate responsibility
 
-Development tasks require a separate class of skills.
+Development tasks use one shared Codex implementation skill, separate from Workbench runtime skills.
 
 Location:
 
-`.codex/skills/skill-iwb-task-<task-slug>/SKILL.md`
+`.codex/skills/skill-iwb-implement/SKILL.md`
 
-These skills instruct Codex to implement application code.
+Use [skill-iwb-implement](../skill-iwb-implement/SKILL.md) with an explicit TASK identifier, for example
+`$skill-iwb-implement TASK-001`.
 
-They are not runtime skills loaded by the Integrated AI Workbench plugin.
+This skill instructs Codex to implement application code. It is not a runtime skill loaded by the Workbench plugin.
+
+Task specifications define what to implement; the shared skill defines implementation, verification, and reporting.
+Keep task-specific objectives, dependencies, boundaries, contracts, and acceptance criteria in the TASK documents.
 
 ### Rules
 
-- One cohesive implementation task should correspond to one Codex task skill.
+- Each cohesive task must reference the shared implementation skill and its own stable TASK identifier.
+- Do not generate individual implementation skills, task-specific copies, or wrappers around the shared skill.
 - A task may touch several files when they implement one complete responsibility.
 - Do not create a separate task merely for every class or source file.
 - Do not create duplicate tasks for already completed functionality.
@@ -368,7 +374,11 @@ They are not runtime skills loaded by the Integrated AI Workbench plugin.
 - Reuse existing project conventions, source paths and abstractions.
 - Prefer a working vertical slice over many disconnected placeholders.
 
-Each generated task skill must be directly executable by Codex.
+Preserve and reuse the existing shared skill. When maintenance is necessary, use installed `skill-creator` instructions
+and validate the result. Do not replace manually improved instructions with a generic generated template.
+
+Do not remove a legacy skill until the shared replacement and its references have been validated and no active
+references to that legacy skill remain. Inspect actual files before attempting cleanup.
 
 Do not generate vague instructions such as "implement the service according to best practices."
 
@@ -384,9 +394,15 @@ For each planned task, create:
 
 `docs/development/tasks/TASK-<number>-<slug>.md`
 
-And its corresponding Codex execution skill:
+Its `Implementation Skill` section must contain one reference to:
 
-`.codex/skills/skill-iwb-task-<slug>/SKILL.md`
+`.codex/skills/skill-iwb-implement/SKILL.md`
+
+Include the task's explicit invocation, such as `$skill-iwb-implement TASK-001`. Use a resolvable relative Markdown link
+from each TASK document: `../../../.codex/skills/skill-iwb-implement/SKILL.md`.
+
+Maintain the existing TASK-001 through TASK-011 specifications. Shared workflow maintenance must not change their
+identifiers, dependencies, objectives, implementation boundaries, acceptance criteria, or completion records.
 
 Use stable IDs.
 
@@ -408,7 +424,7 @@ Before adding tasks, inspect any existing task plan and preserve completed work.
 
 - corresponding README requirement;
 - intended user or architectural value;
-- relevant AI course concept, if any.
+- relevant AI core concept, if any.
 
 **Dependencies**
 
@@ -442,22 +458,21 @@ Before adding tasks, inspect any existing task plan and preserve completed work.
 
 **Execution**
 
-- corresponding Codex skill name;
+- shared Codex implementation skill reference and the task's stable identifier;
 - how to invoke it in the available Codex environment.
 
 ### Task status
 
-Use:
+Use the status definitions in `docs/development/tasks/README.md`:
 
-- `TODO`
 - `READY`
 - `BLOCKED`
-- `IN_PROGRESS`
-- `DONE`
+- `IN PROGRESS`
+- `VERIFIED`
 
-Do not mark a task DONE because skeleton classes exist.
+Do not mark a task `VERIFIED` because skeleton classes exist.
 
-Mark DONE only when implementation and acceptance evidence support completion.
+Mark `VERIFIED` only when implementation and acceptance evidence support completion.
 
 Identify blocked dependencies explicitly.
 
@@ -512,14 +527,14 @@ Do not defer this until after implementing every other subsystem.
 
 - Deterministic checks.
 - Reproducible result metadata.
-- Few-shot demonstration.
+- Few-shot verification.
 - Judge Agent and evaluation rubric.
 - Structured LLM-as-a-Judge results.
 
 ### Completion
 
 - One complete, real local inference workflow.
-- Explicit demonstration of the required AI concepts.
+- Implementation and verification of core AI capabilities through fully functional, integrated workflows.
 - Verification against README.md.
 - Independent review through `skill-ux-review`.
 
@@ -545,32 +560,32 @@ Do not use hard-coded text responses to claim that local inference works.
 
 Mock providers may be used in unit tests, but not as proof of working inference.
 
-## 12. AI course requirement mapping
+## 12. AI core concept mapping
 
-Every course requirement must have:
+Every core requirement must have:
 
 1. A relevant README requirement.
 2. An architectural owner.
 3. A planned implementation task.
-4. A concrete verification or demonstration method.
+4. A concrete verification or proofing method.
 5. An actual implementation status.
 
 Track at least:
 
-| ID    | Concept               | Required demonstration                                                         |
-|-------|-----------------------|--------------------------------------------------------------------------------|
-| AI-01 | Grounding             | Selected project context reaches a model request under enforced limits.        |
-| AI-02 | System/user roles     | Prompt roles remain correctly separated.                                       |
-| AI-03 | Reasoning             | Supported thinking configuration or concise reasoning summary is demonstrated. |
-| AI-04 | Security              | Input, output, context, secrets and tool access are controlled.                |
-| AI-05 | Few-shot              | Markdown-based examples influence a controlled prompt workflow.                |
-| AI-06 | Structured output     | Model output conforms to a validated typed contract.                           |
-| AI-07 | Generation parameters | Supported parameters reach the local runtime.                                  |
-| AI-08 | Thinking level        | Supported reasoning configuration is applied correctly.                        |
-| AI-09 | Sampling              | Sampling parameters are configurable and respected.                            |
-| AI-10 | LLM-as-a-Judge        | Model-based evaluation produces a structured assessment.                       |
-| AI-11 | Markdown prompts      | Runtime-loaded AGENT.md and SKILL.md affect execution.                         |
-| AI-12 | Integration           | One complete local model workflow executes end to end.                         |
+| ID    | Concept               | Implementation                                                             |
+|-------|-----------------------|----------------------------------------------------------------------------|
+| AI-01 | Grounding             | Selected project context reaches a model request under enforced limits.    |
+| AI-02 | System/user roles     | Prompt roles remain correctly separated.                                   |
+| AI-03 | Reasoning             | Supported thinking configuration or concise reasoning summary is approved. |
+| AI-04 | Security              | Input, output, context, secrets and tool access are controlled.            |
+| AI-05 | Few-shot              | Markdown-based examples influence a controlled prompt workflow.            |
+| AI-06 | Structured output     | Model output conforms to a validated typed contract.                       |
+| AI-07 | Generation parameters | Supported parameters reach the local runtime.                              |
+| AI-08 | Thinking level        | Supported reasoning configuration is applied correctly.                    |
+| AI-09 | Sampling              | Sampling parameters are configurable and respected.                        |
+| AI-10 | LLM-as-a-Judge        | Model-based evaluation produces a structured assessment.                   |
+| AI-11 | Markdown prompts      | Runtime-loaded AGENT.md and SKILL.md affect execution.                     |
+| AI-12 | Integration           | One complete local model workflow executes end to end.                     |
 
 Do not require exposure of a model's hidden private chain of thought.
 
@@ -593,11 +608,11 @@ Every task must be:
 - testable;
 - traceable to README.md.
 
-Generated Codex task skills must specify the actual expected workflow.
+TASK specifications must retain their concrete requirements without duplicating the shared execution procedure.
 
-Each task skill should include:
+Each task specification should include:
 
-1. YAML frontmatter with a unique skill name and description.
+1. A stable TASK identifier and one shared implementation skill reference with an explicit invocation.
 2. Applicable README context.
 3. Task ID and objective.
 4. Prerequisite tasks.
@@ -619,7 +634,7 @@ Use official platform conventions appropriate to the chosen development baseline
 
 ## 14. Task implementation safety
 
-Generated Codex implementation skills must instruct the coding agent to:
+The shared Codex implementation skill must instruct the coding agent to:
 
 - inspect Git status before editing;
 - read relevant README files;
@@ -630,6 +645,10 @@ Generated Codex implementation skills must instruct the coding agent to:
 - validate compilation and relevant tests;
 - inspect errors and fix confirmed causes;
 - report actual results.
+
+Each task execution writes or updates `_local/reports/task-reports/task-XXX.md`, using lowercase filenames such as
+`task-001.md`. Keep `_local/` excluded from Git and verify that reports are not already tracked. Preserve compact
+completion evidence in the TASK specification and backlog; do not treat local reports as version-controlled records.
 
 Do not authorize destructive Git operations.
 
@@ -643,7 +662,7 @@ Do not introduce mandatory cloud connections.
 
 Do not install extra AI plugins as a shortcut.
 
-Do not replace a managed local inference runtime with an external service merely because it is easier to demonstrate.
+Do not replace a managed local inference runtime with an external service merely because it is easier to implement.
 
 ## 15. Planning and implementation separation
 
@@ -655,8 +674,8 @@ It may create or update:
 - runtime SKILL.md files;
 - relevant prompt templates;
 - development task specifications;
-- task-specific Codex skills;
-- course requirement mappings;
+- references to the shared Codex implementation skill and justified maintenance of that skill;
+- core concepts mappings;
 - brief architecture decision records where necessary.
 
 It must not:
@@ -668,7 +687,8 @@ It must not:
 - launch autonomous multi-task coding sessions;
 - claim task completion without code and validation evidence.
 
-Those actions belong to subsequent task-specific Codex executions or the existing bootstrap skill.
+Those actions belong to subsequent invocations of `skill-iwb-implement` with a selected TASK identifier or the existing
+bootstrap skill.
 
 ## 16. Incremental maintenance
 
@@ -686,7 +706,7 @@ On subsequent runs:
 
 Preserve stable task IDs.
 
-Preserve valid task-specific implementation instructions.
+Preserve valid task-specific implementation instructions in TASK specifications and the existing shared workflow.
 
 Do not overwrite manually improved instructions with generic templates.
 
@@ -694,7 +714,7 @@ Do not duplicate already implemented tasks.
 
 If the README scope changes, update the affected task dependencies and acceptance criteria.
 
-If an implementation satisfies a requirement, verify the evidence before marking the task DONE.
+If an implementation satisfies a requirement, verify the evidence before marking the task `VERIFIED`.
 
 If a task is obsolete, mark it superseded or N/A with a reason rather than silently deleting its history.
 
@@ -730,11 +750,8 @@ integrated-ai-workbench/
 │       │   └── SKILL.md
 │       ├── skill-integrated-ai-workbench/
 │       │   └── SKILL.md
-│       ├── skill-iwb-task-model-registry/
-│       │   └── SKILL.md
-│       ├── skill-iwb-task-local-runtime/
-│       │   └── SKILL.md
-│       └── ...
+│       └── skill-iwb-implement/
+│           └── SKILL.md
 └── docs/
     └── development/
         ├── AI-REQUIREMENTS.md
@@ -763,16 +780,19 @@ After generating the planning artifacts:
 
 1. Verify all generated files exist.
 2. Verify agent instructions are complete and internally consistent.
-3. Verify task skills have valid metadata and executable instructions.
+3. Verify the shared implementation skill has valid metadata, is discoverable, and has executable instructions.
 4. Verify task IDs are unique.
 5. Verify dependencies refer to existing tasks.
 6. Detect circular task dependencies.
 7. Verify each active README MVP requirement has an implementation task or verified implementation.
-8. Verify each mandatory AI course concept has a plan and acceptance evidence target.
+8. Verify each mandatory AI core concept has a plan and acceptance evidence target.
 9. Verify local inference is treated as a Base Plugin responsibility.
 10. Verify no future extension is incorrectly made a mandatory MVP dependency.
 11. Verify existing bootstrap and review skills remain intact.
 12. Check Git diff for unintended changes.
+13. Verify every TASK's shared-skill link resolves and its invocation contains the matching identifier.
+14. Verify no active references or generation instructions require individual implementation skills.
+15. Verify `_local/reports/task-reports/task-XXX.md` paths are ignored and no local reports are tracked.
 
 Do not claim application functionality has been validated merely because planning files are valid.
 
@@ -784,10 +804,10 @@ This planning task is complete when:
 - relevant runtime workflow skills have meaningful contents;
 - README requirements are translated into cohesive implementation tasks;
 - tasks have explicit dependency order;
-- each actionable coding task has a corresponding Codex implementation skill;
+- each actionable coding task references the single shared implementation skill and its own TASK identifier;
 - local inference has a technically credible implementation path;
 - no separate AI application is required by the planned Base Plugin;
-- AI course requirements are traceable to tasks and verification methods;
+- AI core concepts are traceable to tasks and verification methods;
 - future capabilities are correctly deferred;
 - existing project instructions and skills are preserved.
 
@@ -798,7 +818,7 @@ Provide a concise Estonian summary:
 - agents created or updated;
 - runtime skills created or updated;
 - number of development tasks;
-- number of Codex task skills;
+- shared implementation skill location and invocation;
 - earliest READY task;
 - blocked tasks and their dependencies;
 - major architectural decisions;

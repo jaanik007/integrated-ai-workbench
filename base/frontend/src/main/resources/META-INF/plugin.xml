@@ -2,20 +2,34 @@
 <idea-plugin>
     <id>integrated-ai-workbench</id>
     <name>Integrated AI Workbench</name>
-    <vendor url="https://github.com/jaanik007/integrated-ai-workbench">Integrated AI Workbench</vendor>
+
+    <vendor url="https://github.com/jaanik007/integrated-ai-workbench">
+        Integrated AI Workbench
+    </vendor>
 
     <description><![CDATA[
-        Integrated AI Workbench is a local-first AI development
-        environment integrated into IntelliJ IDEA.
+        <p>
+            Integrated AI Workbench is an experimental,
+            local-first AI development plugin for IntelliJ IDEA.
+        </p>
 
-        The project aims to support user-supplied local language
-        models, agent and skill workflows, controlled project
-        grounding, secure tool execution, structured output,
-        and model evaluation.
+        <p>
+            The plugin provides an interface for registering
+            local GGUF model profiles, selecting Markdown-defined
+            agents, supplying controlled project context,
+            and executing local inference workflows.
+        </p>
 
-        The Base Plugin is under active development.
-        Cloud services and external AI applications are not
-        required by its intended core architecture.
+        <p>
+            Integration with permitted IntelliJ MCP tools,
+            structured output validation, and model evaluation
+            is under active development and verification.
+        </p>
+
+        <p>
+            The core architecture is designed to operate locally
+            without requiring cloud AI subscriptions.
+        </p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -25,5 +39,20 @@
                 id="AI Workbench"
                 anchor="right"
                 factoryClass="com.jaanik.integratedaiworkbench.frontend.AiWorkbenchToolWindowFactory"/>
+        <applicationConfigurable
+                id="integrated.ai.workbench.settings"
+                displayName="Integrated AI Workbench"
+                parentId="tools"
+                instance="com.jaanik.integratedaiworkbench.frontend.WorkbenchSettingsConfigurable"/>
     </extensions>
+
+    <actions>
+        <action
+                id="com.jaanik.integratedaiworkbench.OpenWorkbenchAction"
+                class="com.jaanik.integratedaiworkbench.frontend.OpenWorkbenchAction"
+                text="Integrated AI Workbench"
+                description="Open the AI Workbench Tool Window">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

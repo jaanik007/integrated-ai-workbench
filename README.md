@@ -313,7 +313,7 @@ The MVP is complete when at least one real workflow can execute this path end to
 
 ---
 
-## AI Concepts Demonstrated by the MVP
+## AI Concepts Implemented in the MVP
 
 | Concept | Integrated AI Workbench implementation |
 |---|---|

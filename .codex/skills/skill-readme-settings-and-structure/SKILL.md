@@ -437,7 +437,7 @@ Create a minimal, consistent structure under `.ai/`:
 - `profiles/`
 - `policies/`
 
-The default agent and skill should define a safe demonstration workflow and must not imply capabilities that have not
+The default agent and skill should define a safe workflow verification and must not imply capabilities that have not
 been implemented.
 
 Keep runtime agent definitions separate from Codex development instructions.

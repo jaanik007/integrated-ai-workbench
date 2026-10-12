@@ -17,6 +17,8 @@ repositories {
 }
 
 dependencies {
+    testImplementation(kotlin("test"))
+
     intellijPlatform {
         intellijIdea("2026.1.3")
         testFramework(TestFrameworkType.Platform)
@@ -48,6 +50,20 @@ sourceSets {
     }
 }
 
+tasks.withType<Test>().configureEach {
+    listOf(
+        "iwb.realMcp",
+        "iwb.realJudge",
+        "iwb.runtime.executable",
+        "iwb.runtime.model",
+        "iwb.runtime.releaseTag",
+        "iwb.runtime.artifact",
+        "iwb.runtime.executableSha256",
+    ).forEach { property ->
+        providers.systemProperty(property).orNull?.let { systemProperty(property, it) }
+    }
+}
+
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
@@ -55,4 +71,3 @@ intellijPlatform {
         }
     }
 }
-
