@@ -24,6 +24,8 @@ class LlamaServerRealInferenceTest {
     fun `generates a typed response through the configured managed local runtime`() {
         if (setting(ENABLED, ENV_ENABLED) != "true") return
 
+        val gpuRequested = setting(GPU_ENABLED, ENV_GPU_ENABLED) == "true"
+
         val modelPath = Path.of(requiredSetting(MODEL, ENV_MODEL)).toRealPath()
         val validator = ModelPathValidator.fromSelections(listOf(modelPath), emptyList())
         val registry = InMemoryModelRegistry(validator)
@@ -47,6 +49,8 @@ class LlamaServerRealInferenceTest {
             releaseTag = requiredSetting(RELEASE_TAG, ENV_RELEASE_TAG),
             officialArtifactName = requiredSetting(ARTIFACT, ENV_ARTIFACT),
             expectedExecutableSha256 = requiredSetting(EXECUTABLE_SHA256, ENV_EXECUTABLE_SHA256),
+            cudaEnabled = gpuRequested,
+            gpuLayers = if (gpuRequested) 999 else null,
         )))
         val service = LocalInferenceService(registry, validator, RuntimeCompatibilityMatcher(), JvmHardwareDetector(), manager)
 
@@ -58,6 +62,12 @@ class LlamaServerRealInferenceTest {
         assertTrue(response.content.isNotBlank())
         assertEquals(profile.id, response.metadata["profileId"])
         assertEquals("llama-cpp-server", response.executionMetadata!!.runtimeId)
+        if (gpuRequested) {
+            assertEquals("GPU", response.metadata["executionDevice"])
+            assertTrue(response.metadata["gpuOffloadEvidence"].orEmpty().contains("offload", ignoreCase = true))
+        } else {
+            assertEquals("CPU", response.metadata["executionDevice"])
+        }
         assertFalse(response.metadata.values.any { it.contains(modelPath.toString(), ignoreCase = true) })
         assertEquals(RuntimeLifecycleState.STOPPED, manager.status().state)
     }
@@ -82,12 +92,14 @@ class LlamaServerRealInferenceTest {
 
     private companion object {
         const val ENABLED = "iwb.realInference"
+        const val GPU_ENABLED = "iwb.realGpuInference"
         const val EXECUTABLE = "iwb.runtime.executable"
         const val MODEL = "iwb.runtime.model"
         const val RELEASE_TAG = "iwb.runtime.releaseTag"
         const val ARTIFACT = "iwb.runtime.artifact"
         const val EXECUTABLE_SHA256 = "iwb.runtime.executableSha256"
         const val ENV_ENABLED = "IWB_REAL_INFERENCE"
+        const val ENV_GPU_ENABLED = "IWB_REAL_GPU_INFERENCE"
         const val ENV_EXECUTABLE = "IWB_RUNTIME_EXECUTABLE"
         const val ENV_MODEL = "IWB_RUNTIME_MODEL"
         const val ENV_RELEASE_TAG = "IWB_RUNTIME_RELEASE_TAG"

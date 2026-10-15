@@ -1,48 +1,43 @@
 package com.jaanik.integratedaiworkbench.frontend
 
 import com.jaanik.integratedaiworkbench.shared.settings.WorkbenchSettingsService
-import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class WorkbenchSettingsServiceTest {
     @Test
-    fun `persists a validated complete preference snapshot`() {
+    fun `persists the selected managed provider and default model profile`() {
         val service = WorkbenchSettingsService()
-        val directory = createTempDirectory("iwb-models")
 
         service.update(service.snapshot().copy(
-            defaultModelDirectory = directory.toString(),
-            lmStudioEndpoint = "http://127.0.0.1:1234",
+            selectedProviderId = "llama-cpp-gpu",
+            defaultModelProfileId = "local-profile",
             readOnlyMcpToolsEnabled = true,
         ))
 
         val state = service.snapshot()
-        assertEquals(directory.toString(), state.defaultModelDirectory)
-        assertEquals("http://127.0.0.1:1234", state.lmStudioEndpoint)
-        assertTrue(state.readOnlyMcpToolsEnabled)
+        assertEquals("llama-cpp-gpu", state.selectedProviderId)
+        assertEquals("local-profile", state.defaultModelProfileId)
+        assertEquals(true, state.readOnlyMcpToolsEnabled)
     }
 
     @Test
-    fun `rejects a missing model directory without replacing saved state`() {
+    fun `retains legacy directory data while migrating to per file model registration`() {
+        val service = WorkbenchSettingsService()
+        service.loadState(service.snapshot().copy(defaultModelDirectory = "C:/moved-models"))
+        assertEquals("C:/moved-models", service.snapshot().defaultModelDirectory)
+    }
+
+    @Test
+    fun `rejects an empty provider without replacing saved state`() {
         val service = WorkbenchSettingsService()
         val before = service.snapshot()
 
         assertFailsWith<IllegalArgumentException> {
-            service.update(before.copy(defaultModelDirectory = "C:/missing-iwb-model-directory"))
+            service.update(before.copy(selectedProviderId = ""))
         }
 
         assertEquals(before, service.snapshot())
-    }
-
-    @Test
-    fun `rejects non HTTP LM Studio endpoint`() {
-        val service = WorkbenchSettingsService()
-
-        assertFailsWith<IllegalArgumentException> {
-            service.update(service.snapshot().copy(lmStudioEndpoint = "file:///not-a-provider"))
-        }
     }
 }

@@ -158,6 +158,8 @@ class LocalInferenceService(
     private fun durationMillis(startedAt: Long): Long = Duration.ofNanos(System.nanoTime() - startedAt).toMillis()
 
     private companion object {
-        val SAFE_RUNTIME_METADATA_KEYS = setOf("runtime", "error")
+        // GPU offload is deliberately retained: it is execution provenance, not
+        // a model path, prompt, or other sensitive runtime detail.
+        val SAFE_RUNTIME_METADATA_KEYS = setOf("runtime", "error", "executionDevice", "gpuOffloadEvidence")
     }
 }

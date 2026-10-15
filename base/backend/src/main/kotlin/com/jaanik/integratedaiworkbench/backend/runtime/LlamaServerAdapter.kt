@@ -29,6 +29,7 @@ data class LlamaServerConfiguration(
     val expectedExecutableSha256: String,
     val cudaEnabled: Boolean = false,
     val gpuLayers: Int? = null,
+    val contextWindowTokens: Int? = null,
 ) {
     init {
         require(executablePath.isAbsolute && executablePath.fileName.toString().equals("llama-server.exe", true)) {
@@ -43,22 +44,40 @@ data class LlamaServerConfiguration(
         require(expectedExecutableSha256.matches(Regex("[A-Fa-f0-9]{64}"))) { "Executable SHA-256 must be provided." }
         require(gpuLayers == null || gpuLayers >= 0) { "GPU layer count must not be negative." }
         require(!cudaEnabled || gpuLayers != null) { "CUDA configuration requires an explicit GPU layer count." }
+        require(contextWindowTokens == null || contextWindowTokens > 0) { "Context window tokens must be positive when configured." }
     }
 }
 
 /** Loads machine-local runtime provenance without embedding workstation paths in plugin code. */
-fun loadLlamaServerConfiguration(file: Path, modelPath: Path, port: Int): LlamaServerConfiguration {
+fun loadLlamaServerConfiguration(
+    file: Path,
+    modelPath: Path,
+    port: Int,
+    contextWindowTokens: Int? = null,
+    providerId: String? = null,
+): LlamaServerConfiguration {
     require(Files.isRegularFile(file) && Files.isReadable(file)) { "Workbench llama.cpp configuration is unavailable." }
     val properties = Properties().also { Files.newInputStream(file).use(it::load) }
-    fun required(name: String): String = properties.getProperty(name)?.trim()?.takeIf { it.isNotBlank() }
+    // Unprefixed keys are the legacy CPU configuration. A GPU selection must
+    // never fall back to them, or an explicit GPU choice could run on CPU.
+    val scopedPrefix = providerId?.takeIf { it.isNotBlank() }?.plus(".")
+    fun value(name: String): String? =
+        scopedPrefix?.let { properties.getProperty(it + name) }?.trim()?.takeIf { it.isNotBlank() }
+            ?: if (providerId == "llama-cpp-gpu") null
+            else properties.getProperty(name)?.trim()?.takeIf { it.isNotBlank() }
+    fun required(name: String): String = value(name)
         ?: throw IllegalArgumentException("Workbench llama.cpp configuration property '$name' is required.")
+    val configuredContextWindow = value("contextWindowTokens")?.let { configuredValue ->
+        configuredValue.toIntOrNull() ?: throw IllegalArgumentException("Workbench llama.cpp contextWindowTokens must be an integer.")
+    }
     return LlamaServerConfiguration(
         executablePath = Path.of(required("executablePath")).toRealPath(), modelPath = modelPath, port = port,
-        startupTimeout = Duration.ofSeconds(properties.getProperty("startupTimeoutSeconds", "120").toLong()),
+        startupTimeout = Duration.ofSeconds(value("startupTimeoutSeconds")?.toLong() ?: 120),
         releaseTag = required("releaseTag"), officialArtifactName = required("officialArtifactName"),
         expectedExecutableSha256 = required("expectedExecutableSha256"),
-        cudaEnabled = properties.getProperty("cudaEnabled", "false").toBoolean(),
-        gpuLayers = properties.getProperty("gpuLayers")?.toIntOrNull(),
+        cudaEnabled = value("cudaEnabled")?.toBoolean() ?: false,
+        gpuLayers = value("gpuLayers")?.toIntOrNull(),
+        contextWindowTokens = contextWindowTokens ?: configuredContextWindow,
     )
 }
 
@@ -66,6 +85,8 @@ fun loadLlamaServerConfiguration(file: Path, modelPath: Path, port: Int): LlamaS
 class LlamaServerAdapter(private val configuration: LlamaServerConfiguration) : ManagedLocalRuntimeAdapter {
     override val runtimeId: String = "llama-cpp-server"
     @Volatile private var process: Process? = null
+    @Volatile private var gpuOffloadEvidence: String? = null
+    private val runtimeLog = StringBuilder()
 
     override fun capabilities(): RuntimeCapabilities = RuntimeCapabilities(
         runtimeId = runtimeId,
@@ -82,7 +103,14 @@ class LlamaServerAdapter(private val configuration: LlamaServerConfiguration) : 
     @Synchronized override fun start() {
         if (process?.isAlive == true) return
         validateResources()
-        process = ProcessBuilder(command()).redirectErrorStream(false).start()
+        gpuOffloadEvidence = null
+        synchronized(runtimeLog) { runtimeLog.clear() }
+        val started = ProcessBuilder(command()).redirectErrorStream(true).start()
+        process = started
+        Thread({ captureRuntimeOutput(started) }, "iwb-llama-server-log").apply {
+            isDaemon = true
+            start()
+        }
     }
 
     override fun isReady(): Boolean {
@@ -90,7 +118,7 @@ class LlamaServerAdapter(private val configuration: LlamaServerConfiguration) : 
         if (!running) return false
         val deadline = System.nanoTime() + configuration.startupTimeout.toNanos()
         while (System.nanoTime() < deadline) {
-            if (healthCheck()) return true
+            if (healthCheck() && (!configuration.cudaEnabled || gpuOffloadEvidence != null)) return true
             Thread.sleep(100)
         }
         return false
@@ -125,7 +153,19 @@ class LlamaServerAdapter(private val configuration: LlamaServerConfiguration) : 
             if (code !in 200..299) error("llama-server rejected the generation request.")
             val body = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
             val content = chatCompletionContent(body)
-            ModelResponse(content, toolCalls = ToolCallEnvelopeParser.parse(content), metadata = mapOf("runtime" to runtimeId))
+            ModelResponse(
+                content,
+                toolCalls = ToolCallEnvelopeParser.parse(content),
+                metadata = buildMap {
+                    put("runtime", runtimeId)
+                    if (configuration.cudaEnabled) {
+                        put("executionDevice", "GPU")
+                        put("gpuOffloadEvidence", gpuOffloadEvidence ?: "GPU offload was not verified.")
+                    } else {
+                        put("executionDevice", "CPU")
+                    }
+                },
+            )
         } catch (_: SocketTimeoutException) {
             ModelResponse("", status = com.jaanik.integratedaiworkbench.shared.model.ModelResponseStatus.TIMED_OUT, metadata = mapOf("runtime" to runtimeId, "error" to "Inference request timed out."))
         } catch (_: Exception) {
@@ -137,7 +177,10 @@ class LlamaServerAdapter(private val configuration: LlamaServerConfiguration) : 
         add(configuration.executablePath.toString())
         addAll(listOf("--host", "127.0.0.1", "--port", configuration.port.toString(), "--model", configuration.modelPath.toString()))
         addAll(listOf("--reasoning", "off"))
-        configuration.gpuLayers?.let { addAll(listOf("--gpu-layers", it.toString())) }
+        configuration.contextWindowTokens?.let { addAll(listOf("--ctx-size", it.toString())) }
+        // CPU mode must actively prohibit model-layer offload.
+        addAll(listOf("--gpu-layers", (configuration.gpuLayers ?: 0).toString()))
+        if (configuration.cudaEnabled) addAll(listOf("--log-verbosity", "4"))
     }
 
     private fun validateResources() {
@@ -162,6 +205,18 @@ class LlamaServerAdapter(private val configuration: LlamaServerConfiguration) : 
         connection.requestMethod = "GET"
         connection.responseCode in 200..299
     }.getOrDefault(false)
+
+    private fun captureRuntimeOutput(started: Process) {
+        started.inputStream.bufferedReader(Charsets.UTF_8).useLines { lines -> lines.forEach(::recordRuntimeLine) }
+    }
+
+    private fun recordRuntimeLine(line: String) {
+        synchronized(runtimeLog) {
+            runtimeLog.appendLine(line)
+            if (runtimeLog.length > MAX_RUNTIME_LOG_CHARS) runtimeLog.delete(0, runtimeLog.length - MAX_RUNTIME_LOG_CHARS)
+        }
+        if (GPU_OFFLOAD_PATTERN.containsMatchIn(line)) gpuOffloadEvidence = line.trim()
+    }
 
     internal fun requestBody(request: ModelRequest): String = buildString {
         append("{\"model\":\"local\",\"messages\":[{\"role\":\"user\",\"content\":\"")
@@ -191,4 +246,11 @@ class LlamaServerAdapter(private val configuration: LlamaServerConfiguration) : 
     }
 
     private fun escapeJson(value: String): String = value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
+
+    internal fun gpuOffloadEvidence(): String? = gpuOffloadEvidence
+
+    private companion object {
+        const val MAX_RUNTIME_LOG_CHARS = 32 * 1024
+        val GPU_OFFLOAD_PATTERN = Regex("""(?i)offload(?:ed|ing).*layers?.*(?:gpu|cuda)""")
+    }
 }

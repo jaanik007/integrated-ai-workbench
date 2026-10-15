@@ -73,7 +73,7 @@ class ModelRegistryTest {
 
         component.loadState(ModelRegistryState(
             mutableListOf(PersistedModel("model-1", "Model", modelPath.toString(), mutableListOf("profile-1"))),
-            mutableListOf(PersistedProfile("model-1", profile)),
+            mutableListOf(PersistedProfile("model-1", PersistedModelProfile.from(profile))),
         ))
 
         assertEquals("model-1", component.registry().findModel("model-1")?.id)

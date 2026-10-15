@@ -7,6 +7,7 @@ import java.security.MessageDigest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class LlamaServerAdapterTest {
@@ -16,9 +17,57 @@ class LlamaServerAdapterTest {
         val model = Files.writeString(directory.resolve("model.gguf"), "fixture")
         val adapter = LlamaServerAdapter(LlamaServerConfiguration(executable, model, port = 19080, releaseTag = "b11541", officialArtifactName = "fixture", expectedExecutableSha256 = hash(executable), cudaEnabled = true, gpuLayers = 20))
 
-        assertEquals(listOf(executable.toString(), "--host", "127.0.0.1", "--port", "19080", "--model", model.toString(), "--reasoning", "off", "--gpu-layers", "20"), adapter.command())
+        assertEquals(listOf(executable.toString(), "--host", "127.0.0.1", "--port", "19080", "--model", model.toString(), "--reasoning", "off", "--gpu-layers", "20", "--log-verbosity", "4"), adapter.command())
         assertTrue(ExecutionDevice.GPU in adapter.capabilities().supportedExecutionDevices)
         assertTrue(AccelerationBackend.CUDA in adapter.capabilities().supportedAccelerationBackends)
+    }
+
+    @Test fun `passes a configured profile context window to llama server`() {
+        val directory = Files.createTempDirectory("llama-server")
+        val executable = Files.writeString(directory.resolve("llama-server.exe"), "fixture")
+        val model = Files.writeString(directory.resolve("model.gguf"), "fixture")
+        val adapter = LlamaServerAdapter(LlamaServerConfiguration(
+            executable, model, releaseTag = "b11541", officialArtifactName = "fixture",
+            expectedExecutableSha256 = hash(executable), contextWindowTokens = 8_192,
+        ))
+
+        assertTrue(adapter.command().windowed(2).any { it == listOf("--ctx-size", "8192") })
+    }
+
+    @Test fun `CPU command explicitly disables GPU layer offload`() {
+        val directory = Files.createTempDirectory("llama-server")
+        val executable = Files.writeString(directory.resolve("llama-server.exe"), "fixture")
+        val model = Files.writeString(directory.resolve("model.gguf"), "fixture")
+        val adapter = LlamaServerAdapter(LlamaServerConfiguration(executable, model, releaseTag = "b11541", officialArtifactName = "fixture", expectedExecutableSha256 = hash(executable)))
+
+        assertTrue(adapter.command().windowed(2).any { it == listOf("--gpu-layers", "0") })
+    }
+
+    @Test fun `loads a scoped GPU configuration without using the CPU runtime`() {
+        val directory = Files.createTempDirectory("llama-server")
+        val cpu = Files.writeString(directory.resolve("cpu-llama-server.exe"), "cpu")
+        val gpu = Files.writeString(directory.resolve("llama-server.exe"), "gpu")
+        val model = Files.writeString(directory.resolve("model.gguf"), "fixture")
+        val cpuPath = cpu.toString().replace('\\', '/')
+        val gpuPath = gpu.toString().replace('\\', '/')
+        val configuration = Files.writeString(directory.resolve("runtime.properties"), """
+            executablePath=$cpuPath
+            releaseTag=cpu
+            officialArtifactName=CPU
+            expectedExecutableSha256=${hash(cpu)}
+            llama-cpp-gpu.executablePath=$gpuPath
+            llama-cpp-gpu.releaseTag=gpu
+            llama-cpp-gpu.officialArtifactName=CUDA
+            llama-cpp-gpu.expectedExecutableSha256=${hash(gpu)}
+            llama-cpp-gpu.cudaEnabled=true
+            llama-cpp-gpu.gpuLayers=999
+        """.trimIndent())
+
+        val loaded = loadLlamaServerConfiguration(configuration, model, 19080, providerId = "llama-cpp-gpu")
+        assertTrue(Files.isSameFile(gpu, loaded.executablePath))
+        assertTrue(loaded.cudaEnabled)
+        assertEquals(999, loaded.gpuLayers)
+        assertFalse(Files.isSameFile(cpu, loaded.executablePath))
     }
 
     @Test fun `rejects nonlocal unsupported or inconsistent configuration`() {

@@ -22,6 +22,8 @@ import com.jaanik.integratedaiworkbench.backend.runtime.RuntimeCompatibilityMatc
 import com.jaanik.integratedaiworkbench.backend.runtime.loadLlamaServerConfiguration
 import com.jaanik.integratedaiworkbench.backend.security.InputGuard
 import com.jaanik.integratedaiworkbench.shared.model.ModelProfile
+import com.jaanik.integratedaiworkbench.shared.model.ModelRequest
+import com.jaanik.integratedaiworkbench.shared.model.ModelResponse
 import com.jaanik.integratedaiworkbench.shared.run.AgentExecutionOutcome
 import com.jaanik.integratedaiworkbench.shared.settings.WorkbenchSettingsService
 import java.net.InetAddress
@@ -39,6 +41,30 @@ class AiWorkbenchService(
 
     fun profiles(): List<ModelProfile> = registry.profiles()
 
+    fun runtimeAvailability(profileId: String?): WorkbenchRuntimeAvailability {
+        val profile = profileId?.let(registry::find)
+        if (!settings.managedLlamaCppEnabled) return WorkbenchRuntimeAvailability.disabled("Workbench-managed llama.cpp is disabled in AI Workbench settings.")
+        if (profile == null) return WorkbenchRuntimeAvailability.unavailable("Select an accessible registered GGUF model first.")
+        if (profile.providerId != MANAGED_LLAMA_CPP_PROVIDER) {
+            return WorkbenchRuntimeAvailability.unavailable("The selected model is not registered for the Workbench-managed llama.cpp provider.")
+        }
+        val configurationPath = projectRoot.resolve(".aim/runtime/llama-server.properties")
+        if (!Files.isRegularFile(configurationPath)) return WorkbenchRuntimeAvailability.unavailable("Workbench-managed llama.cpp configuration is unavailable.")
+        val configuration = runCatching {
+            loadLlamaServerConfiguration(
+                configurationPath,
+                Path.of(profile.modelReference),
+                18080,
+                profile.contextWindowTokens,
+                settings.selectedProviderId,
+            )
+        }.getOrElse { return WorkbenchRuntimeAvailability.unavailable("The managed llama.cpp configuration is invalid.") }
+        if (!Files.isRegularFile(configuration.executablePath) || !Files.isReadable(configuration.executablePath)) {
+            return WorkbenchRuntimeAvailability.unavailable("Configured llama-server.exe is missing or unreadable.")
+        }
+        return managedProviderAvailability(settings.selectedProviderId, configuration)
+    }
+
     fun registerLocalModel(path: Path): ModelProfile =
         ApplicationManager.getApplication().getService(PersistentModelRegistry::class.java).registerLocalModel(path)
 
@@ -53,6 +79,9 @@ class AiWorkbenchService(
         !settings.runtimeAgentsEnabled -> "Runtime agents are disabled in AI Workbench settings."
         profileId.isNullOrBlank() -> "No registered local model profile is selected."
         registry.find(profileId) == null -> "The selected model profile is unavailable."
+        registry.find(profileId)?.providerId != MANAGED_LLAMA_CPP_PROVIDER -> "The selected model does not use the Workbench-managed llama.cpp provider."
+        settings.selectedProviderId !in MANAGED_PROVIDER_IDS -> "Select the Workbench-managed CPU or GPU provider before running a local model."
+        selectedRuntimeUnavailableReason(profileId) != null -> selectedRuntimeUnavailableReason(profileId)
         !Files.isRegularFile(projectRoot.resolve(".aim/runtime/llama-server.properties")) -> "Workbench-managed llama.cpp configuration is unavailable."
         toolExecutionEnabled && !settings.readOnlyMcpToolsEnabled -> "Permitted read-only IntelliJ MCP tools are disabled in AI Workbench settings."
         toolExecutionEnabled && !Files.isRegularFile(projectRoot.resolve(".aim/mcp/intellij-stdio.properties")) -> "IntelliJ MCP STDIO configuration is unavailable."
@@ -66,14 +95,7 @@ class AiWorkbenchService(
         check(settings.projectGroundingEnabled || request.groundingRequest.requestedPaths.isEmpty()) {
             "Project grounding is disabled in AI Workbench settings."
         }
-        val profile = requireNotNull(registry.find(profileId))
-        val validator = ModelPathValidator.fromSelections(registry.models().map { Path.of(it.canonicalPath) }, emptyList())
-        val runtime = LocalInferenceService(
-            registry, validator, RuntimeCompatibilityMatcher(), JvmHardwareDetector(),
-            LifecycleRuntimeManager(LlamaServerAdapter(loadLlamaServerConfiguration(
-                projectRoot.resolve(".aim/runtime/llama-server.properties"), Path.of(profile.modelReference), localPort(),
-            ))),
-        )
+        val runtime = localInference(requireNotNull(registry.find(profileId)))
         val loader = RuntimeMarkdownLoader(projectRoot.resolve(".ai")).also { it.reload(profileId) }
         return AgentExecutionService(
             markdownLoader = loader, modelRegistry = registry,
@@ -85,6 +107,39 @@ class AiWorkbenchService(
                 )
             } else null,
         ).execute(request.copy(expectedOutputSchema = outputSchemaFor(request.agentId)), cancellation)
+    }
+
+    /** Executes the selected registered GGUF directly, without requiring an MCP-enabled runtime agent. */
+    suspend fun executeLocal(profileId: String, prompt: String, cancellation: InferenceCancellation): ModelResponse {
+        check(settings.managedLlamaCppEnabled) { "Workbench-managed llama.cpp is disabled in AI Workbench settings." }
+        val profile = requireNotNull(registry.find(profileId)) { "The selected model profile is unavailable." }
+        check(profile.providerId == MANAGED_LLAMA_CPP_PROVIDER) {
+            "The selected model does not use the Workbench-managed llama.cpp provider."
+        }
+        check(selectedRuntimeUnavailableReason(profile.id) == null) {
+            selectedRuntimeUnavailableReason(profile.id)!!
+        }
+        return localInference(profile).execute(ModelRequest(profile.id, prompt, profile.timeout), cancellation)
+    }
+
+    private fun selectedRuntimeUnavailableReason(profileId: String): String? {
+        val availability = runtimeAvailability(profileId)
+        return when (settings.selectedProviderId) {
+            MANAGED_CPU_PROVIDER -> availability.cpuReason.takeUnless { availability.cpuAvailable }
+            MANAGED_GPU_PROVIDER -> availability.gpuReason.takeUnless { availability.gpuAvailable }
+            else -> "Select the Workbench-managed CPU or GPU provider before running a local model."
+        }
+    }
+
+    private fun localInference(profile: ModelProfile): LocalInferenceService {
+        val validator = ModelPathValidator.fromSelections(registry.models().map { Path.of(it.canonicalPath) }, emptyList())
+        return LocalInferenceService(
+            registry, validator, RuntimeCompatibilityMatcher(), JvmHardwareDetector(),
+            LifecycleRuntimeManager(LlamaServerAdapter(loadLlamaServerConfiguration(
+                projectRoot.resolve(".aim/runtime/llama-server.properties"),
+                Path.of(profile.modelReference), localPort(), profile.contextWindowTokens, settings.selectedProviderId,
+            ))),
+        )
     }
 
     private fun outputSchemaFor(agentId: String): String? = when (agentId) {
@@ -102,3 +157,42 @@ private const val JUDGE_RESPONSE_SCHEMA = """{"type":"object","required":["statu
 data class WorkbenchAgentChoice(val id: String, val displayName: String, val allowedToolIds: Set<String>) {
     override fun toString(): String = displayName
 }
+
+data class WorkbenchRuntimeAvailability(
+    val cpuAvailable: Boolean,
+    val gpuAvailable: Boolean,
+    val cpuReason: String,
+    val gpuReason: String,
+) {
+    companion object {
+        fun unavailable(reason: String) = WorkbenchRuntimeAvailability(false, false, reason, reason)
+        fun disabled(reason: String) = unavailable(reason)
+    }
+}
+
+/** Maps the persisted provider choice to the backend the configured binary can actually run. */
+internal fun managedProviderAvailability(
+    selectedProviderId: String,
+    configuration: com.jaanik.integratedaiworkbench.backend.runtime.LlamaServerConfiguration,
+): WorkbenchRuntimeAvailability = when {
+    selectedProviderId !in MANAGED_PROVIDER_IDS -> WorkbenchRuntimeAvailability.unavailable(
+        "Select the Workbench-managed CPU or GPU provider before running a local model.",
+    )
+    configuration.cudaEnabled -> WorkbenchRuntimeAvailability(
+        cpuAvailable = false,
+        gpuAvailable = true,
+        cpuReason = "Configured llama-server.exe is CUDA-enabled. Select the managed GPU provider or configure a CPU runtime.",
+        gpuReason = "CUDA build configured; executable hash and runtime readiness are checked when execution starts.",
+    )
+    else -> WorkbenchRuntimeAvailability(
+        cpuAvailable = true,
+        gpuAvailable = false,
+        cpuReason = "CPU build configured; executable hash and runtime readiness are checked when execution starts.",
+        gpuReason = "No compatible GPU llama.cpp build is configured.",
+    )
+}
+
+internal const val MANAGED_LLAMA_CPP_PROVIDER = "llama-cpp-server"
+internal const val MANAGED_CPU_PROVIDER = "llama-cpp-cpu"
+internal const val MANAGED_GPU_PROVIDER = "llama-cpp-gpu"
+internal val MANAGED_PROVIDER_IDS = setOf(MANAGED_CPU_PROVIDER, MANAGED_GPU_PROVIDER)

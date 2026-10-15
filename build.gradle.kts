@@ -19,6 +19,9 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
 
+    implementation("org.xerial:sqlite-jdbc:3.49.1.0")
+
+
     intellijPlatform {
         intellijIdea("2026.1.3")
         testFramework(TestFrameworkType.Platform)
@@ -54,6 +57,7 @@ tasks.withType<Test>().configureEach {
     listOf(
         "iwb.realMcp",
         "iwb.realJudge",
+        "iwb.realGpuInference",
         "iwb.runtime.executable",
         "iwb.runtime.model",
         "iwb.runtime.releaseTag",
